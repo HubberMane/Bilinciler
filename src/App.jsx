@@ -289,6 +289,19 @@ function Topbar({ wallet, onConnectWallet }) {
 
 // ---- PAGE: AI AGENT (MAIN) ----
 
+function StatsCard({ label, value, sublabel, trend }) {
+  return (
+    <div className="stats-card">
+      <div className="stats-label">{label}</div>
+      <div className="stats-main-row">
+        <span className="stats-value">{value}</span>
+        {trend && <span className="stats-trend">{trend}</span>}
+      </div>
+      {sublabel && <div className="stats-sublabel">{sublabel}</div>}
+    </div>
+  );
+}
+
 function AgentPage({ coins }) {
   const [messages, setMessages] = useState([
     {
@@ -311,7 +324,6 @@ function AgentPage({ coins }) {
       time: "now",
     };
 
-    // UI olarak sadece echo & mock cevap veriyoruz.
     const mockAgentReply = {
       id: Date.now() + 1,
       from: "agent",
@@ -333,64 +345,95 @@ function AgentPage({ coins }) {
 
   return (
     <div className="agent-page">
-      <div
-        className={
-          "agent-main" + (selectedCoin ? " agent-main--with-chart" : "")
-        }
-      >
-        <div className="agent-chat-panel">
-          <div className="agent-chat-header">
-            <h2>Command your on-chain AI agent</h2>
-            <p>
-              Describe what you want. The agent will build Sui transactions
-              (swaps, NFT mints, staking, transfers) from your prompt.
-            </p>
-          </div>
-          <div className="agent-chat-messages">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={
-                  "chat-bubble chat-bubble--" +
-                  (msg.from === "user" ? "user" : "agent")
-                }
-              >
-                <div className="chat-bubble-meta">
-                  <span className="chat-bubble-from">
-                    {msg.from === "user" ? "You" : "Agent"}
-                  </span>
-                  <span className="chat-bubble-time">{msg.time}</span>
-                </div>
-                <p className="chat-bubble-text">{msg.text}</p>
-              </div>
-            ))}
-          </div>
-          <div className="agent-chat-input">
-            <textarea
-              placeholder='Example: "Swap 100 SUI to USDC and send to 0xabc... in one transaction."'
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-            <button className="btn btn-primary" onClick={sendMessage}>
-              Send to Agent
-            </button>
-          </div>
-        </div>
-
-        {selectedCoin && (
-          <div className="agent-chart-column">
-            <CoinChart coin={selectedCoin} />
-          </div>
-        )}
+      {/* ÜST İSTATİSTİK KARTLARI */}
+      <div className="agent-stats-row">
+        <StatsCard
+          label="Wallet balance"
+          value="248.73 SUI"
+          sublabel="Connected Sui wallet"
+          trend="+5.5% today"
+        />
+        <StatsCard
+          label="AI transactions"
+          value="32"
+          sublabel="Last 24h via agent"
+          trend="+12%"
+        />
+        <StatsCard
+          label="NFTs"
+          value="14"
+          sublabel="Owned on Sui"
+          trend="+3 new"
+        />
+        <StatsCard
+          label="Staked value"
+          value="$4,230"
+          sublabel="Estimated"
+          trend="+2.1%"
+        />
       </div>
 
-      <div className="agent-side">
-        <div className="agent-side-header">
-          <h3>Market watch</h3>
-          <p>Live snapshot of the assets your agent can use.</p>
+      {/* ALT GRID: SOLDa CHAT, SAĞDA MARKET WATCH */}
+      <div className="agent-grid">
+        <div
+          className={
+            "agent-main" + (selectedCoin ? " agent-main--with-chart" : "")
+          }
+        >
+          <div className="agent-chat-panel">
+            <div className="agent-chat-header">
+              <h2>Command your on-chain AI agent</h2>
+              <p>
+                Describe what you want. The agent will build Sui transactions
+                (swaps, NFT mints, staking, transfers) from your prompt.
+              </p>
+            </div>
+            <div className="agent-chat-messages">
+              {messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={
+                    "chat-bubble chat-bubble--" +
+                    (msg.from === "user" ? "user" : "agent")
+                  }
+                >
+                  <div className="chat-bubble-meta">
+                    <span className="chat-bubble-from">
+                      {msg.from === "user" ? "You" : "Agent"}
+                    </span>
+                    <span className="chat-bubble-time">{msg.time}</span>
+                  </div>
+                  <p className="chat-bubble-text">{msg.text}</p>
+                </div>
+              ))}
+            </div>
+            <div className="agent-chat-input">
+              <textarea
+                placeholder='Example: "Swap 100 SUI to USDC and send to 0xabc... in one transaction."'
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+              <button className="btn btn-primary" onClick={sendMessage}>
+                Send to Agent
+              </button>
+            </div>
+          </div>
+
+          {selectedCoin && (
+            <div className="agent-chart-column">
+              <CoinChart coin={selectedCoin} />
+            </div>
+          )}
         </div>
-        <CoinList coins={coins} onSelect={setSelectedCoin} />
+
+        <div className="agent-side">
+          <div className="agent-side-header">
+            <h3>Market watch</h3>
+            <p>Live snapshot of the assets your agent can use.</p>
+          </div>
+          <CoinList coins={coins} onSelect={setSelectedCoin} />
+        </div>
       </div>
     </div>
   );
