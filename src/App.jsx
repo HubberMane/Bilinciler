@@ -1,7 +1,60 @@
-
 import "./styles.css";
 import React, { useState, useEffect, useRef } from "react";
 
+// ---- COINMARKETCAP HELPERS ----
+
+const CMC_ENDPOINT =
+  "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=100&convert=USD";
+
+// CoinMarketCap -> bizim COINS yapısına çevir
+function mapCMCToCoin(cmcCoin) {
+  const usd = cmcCoin.quote?.USD || {};
+
+  return {
+    name: cmcCoin.name,
+    symbol: cmcCoin.symbol,
+    price: usd.price ?? 0,
+    change24h: usd.percent_change_24h ?? 0,
+    change7d: usd.percent_change_7d ?? 0,
+    marketCap: formatBigNumber(usd.market_cap),
+    volume24h: formatBigNumber(usd.volume_24h),
+    dominance:
+      usd.market_cap_dominance != null
+        ? `${usd.market_cap_dominance.toFixed(2)}%`
+        : "—",
+    circulatingSupply: cmcCoin.circulating_supply
+      ? `${cmcCoin.circulating_supply.toLocaleString()} ${cmcCoin.symbol}`
+      : "—",
+
+    // Şimdilik sahte sparkline, UI bozulmasın diye
+    sparkline: generateFakeSparkline(usd.percent_change_24h),
+    holdings: null, // gerçek wallet verisiyle doldurursun
+  };
+}
+
+function formatBigNumber(n) {
+  if (!n && n !== 0) return "—";
+  if (n >= 1e12) return (n / 1e12).toFixed(2) + "T";
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(2) + "K";
+  return n.toFixed(2);
+}
+
+function generateFakeSparkline(change24h = 0) {
+  // “değişim”e göre 8 noktadan oluşan ufak bir eğri
+  const base = 50;
+  const steps = 8;
+  const slope = change24h / steps;
+  const arr = [];
+
+  for (let i = 0; i < steps; i++) {
+    const v = base + slope * i;
+    arr.push(Math.max(10, Math.min(90, v)));
+  }
+
+  return arr;
+}
 
 // ---- PAGES ----
 const PAGES = {
@@ -12,8 +65,8 @@ const PAGES = {
   WALLET: "wallet",
 };
 
-// ---- MOCK DATA ----
-const COINS = [
+// ---- MOCK DATA (FALLBACK) ----
+const FALLBACK_COINS = [
   {
     name: "Bitcoin",
     symbol: "BTC",
@@ -224,7 +277,6 @@ const COINS = [
   },
 ];
 
-
 const INITIAL_NFTS = [
   {
     id: 1,
@@ -290,9 +342,104 @@ function App() {
     address: "",
     suiBalance: 0,
   });
-  const [coins] = useState(COINS);
+
+  const [coins, setCoins] = useState([]);
+  const [coinsLoading, setCoinsLoading] = useState(false);
+  const [coinsError, setCoinsError] = useState(null);
+
   const [nfts, setNfts] = useState(INITIAL_NFTS);
   const [history] = useState(MOCK_HISTORY);
+
+  useEffect(() => {
+    let API_KEY;
+
+    // Vite (VITE_CMC_API_KEY)
+    if (
+      typeof import.meta !== "undefined" &&
+      import.meta.env &&
+      import.meta.env.VITE_CMC_API_KEY
+    ) {
+      API_KEY = import.meta.env.VITE_CMC_API_KEY;
+    }
+    // CRA (REACT_APP_CMC_API_KEY)
+    else if (
+      typeof process !== "undefined" &&
+      process.env &&
+      process.env.REACT_APP_CMC_API_KEY
+    ) {
+      API_KEY = process.env.REACT_APP_CMC_API_KEY;
+    }
+
+    if (!API_KEY) {
+      console.warn(
+        "CoinMarketCap API key bulunamadı, fallback COINS kullanılıyor."
+      );
+      setCoins(FALLBACK_COINS);
+      return;
+    }
+
+    const fetchCoins = async () => {
+      try {
+        setCoinsLoading(true);
+        setCoinsError(null);
+
+        const res = await fetch(CMC_ENDPOINT, {
+          headers: {
+            "X-CMC_PRO_API_KEY": API_KEY,
+            Accept: "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error("HTTP error " + res.status);
+        }
+
+        const json = await res.json();
+
+        let data = json?.data || [];
+
+        const watchList = [
+          "BTC",
+          "ETH",
+          "USDT",
+          "SUI",
+          "SOL",
+          "BNB",
+          "AVAX",
+          "XRP",
+          "DOGE",
+          "ADA",
+          "DOT",
+          "LINK",
+          "UNI",
+          "LTC",
+          "PEPE",
+          "TON",
+        ];
+
+        data = data.filter((c) => watchList.includes(c.symbol));
+
+        const mapped = data.map(mapCMCToCoin);
+
+        if (mapped.length > 0) {
+          setCoins(mapped);
+        } else {
+          console.warn(
+            "API boş veya beklenmeyen format, fallback COINS kullanılıyor."
+          );
+          setCoins(FALLBACK_COINS);
+        }
+      } catch (err) {
+        console.error("CoinMarketCap fetch error:", err);
+        setCoinsError(err.message);
+        setCoins(FALLBACK_COINS);
+      } finally {
+        setCoinsLoading(false);
+      }
+    };
+
+    fetchCoins();
+  }, []);
 
   const handleConnectWallet = () => {
     if (!wallet.connected) {
@@ -329,6 +476,16 @@ function App() {
           theme={theme}
           onToggleTheme={handleToggleTheme}
         />
+
+        {coinsError && (
+          <div
+            className="page-card"
+            style={{ marginBottom: 8, borderColor: "#f97373" }}
+          >
+            <strong>CMC API hatası:</strong> {coinsError} — şu anda mock coin
+            verisi gösteriliyor.
+          </div>
+        )}
 
         <div className="app-content">
           {activePage === PAGES.AGENT && <AgentPage coins={coins} />}
@@ -432,7 +589,6 @@ function Topbar({ wallet, onConnectWallet, theme, onToggleTheme }) {
 }
 
 // ---- PAGE: AI AGENT ----
-
 function AgentPage({ coins }) {
   const [messages, setMessages] = useState([
     {
@@ -443,15 +599,18 @@ function AgentPage({ coins }) {
     },
   ]);
   const [input, setInput] = useState("");
-    const chatRef = useRef(null);   // 👈 chat alanı referansı
+
+  const chatRef = useRef(null);
+
+  // Hover state
+  const [hoveredCoin, setHoveredCoin] = useState(null);
+  const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
-      // istersen smooth:
-      // chatRef.current.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
     }
-  }, [messages]);   
+  }, [messages]);
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -482,6 +641,21 @@ function AgentPage({ coins }) {
     }
   };
 
+  // Sidebar coin hover handler'ları
+  const handleCoinHover = (coin, rect) => {
+    const GAP = 12;
+
+    const x = rect.left - GAP;
+    const y = rect.top + rect.height / 2;
+
+    setHoveredCoin(coin);
+    setHoverPos({ x, y });
+  };
+
+  const handleCoinLeave = () => {
+    setHoveredCoin(null);
+  };
+
   return (
     <div className="agent-page">
       <div className="agent-main-column">
@@ -494,7 +668,6 @@ function AgentPage({ coins }) {
         </div>
 
         <div className="agent-chat-area" ref={chatRef}>
-
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -528,14 +701,27 @@ function AgentPage({ coins }) {
       </div>
 
       <div className="agent-coins-column">
-  <h3 className="coins-title">Coins</h3>
-  <p className="coins-subtitle">Hover to see the mini chart.</p>
+        <h3 className="coins-title">Coins</h3>
+        <p className="coins-subtitle">Hover to see the mini chart.</p>
 
-  {/* 👇 yeni scroll container */}
-  <div className="agent-coins-scroll">
-    <CoinList coins={coins} />
-  </div>
-</div>
+        <div className="agent-coins-scroll">
+          <CoinList
+            coins={coins}
+            onHover={handleCoinHover}
+            onLeave={handleCoinLeave}
+          />
+        </div>
+      </div>
+
+      {/* Global hover popup */}
+      {hoveredCoin && (
+        <div
+          className="coin-hover-layer"
+          style={{ top: hoverPos.y, left: hoverPos.x }}
+        >
+          <CoinMiniChart coin={hoveredCoin} />
+        </div>
+      )}
     </div>
   );
 }
@@ -566,15 +752,20 @@ function CoinMiniChart({ coin }) {
   );
 }
 
-function CoinList({ coins }) {
+function CoinList({ coins, onHover, onLeave }) {
   return (
     <div className="coin-list coin-list--sidebar">
       {coins.map((coin) => (
-        <div key={coin.symbol} className="coin-row">
-          <div className="coin-popup">
-            <CoinMiniChart coin={coin} />
-          </div>
-
+        <div
+          key={coin.symbol}
+          className="coin-row"
+          onMouseEnter={(e) => {
+            if (!onHover) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            onHover(coin, rect);
+          }}
+          onMouseLeave={onLeave}
+        >
           <div className="coin-row-left">
             <div className="coin-avatar">{coin.symbol[0]}</div>
             <div>
@@ -664,6 +855,12 @@ function CoinDetailChart({ coin }) {
 function CoinsPage({ coins }) {
   const [selectedCoin, setSelectedCoin] = useState(coins[0] || null);
 
+  useEffect(() => {
+    if (coins.length && !selectedCoin) {
+      setSelectedCoin(coins[0]);
+    }
+  }, [coins, selectedCoin]);
+
   return (
     <div className="page">
       <div className="page-header">
@@ -675,97 +872,95 @@ function CoinsPage({ coins }) {
       </div>
 
       <div className="coins-page">
-       <div className="page-card coins-table-card">
-  <div className="coins-table-header">
-    <div>
-      <h3>All markets</h3>
-      <p>Static demo data — later you will plug your API here.</p>
-    </div>
-    <div className="coins-table-controls">
-      <input
-        type="text"
-        placeholder="Search coin..."
-        className="coins-search"
-      />
-      <select className="coins-currency">
-        <option>USD</option>
-        <option>EUR</option>
-      </select>
-    </div>
-  </div>
+        <div className="page-card coins-table-card">
+          <div className="coins-table-header">
+            <div>
+              <h3>All markets</h3>
+              <p>Static demo data — later you will plug your API here.</p>
+            </div>
+            <div className="coins-table-controls">
+              <input
+                type="text"
+                placeholder="Search coin..."
+                className="coins-search"
+              />
+              <select className="coins-currency">
+                <option>USD</option>
+                <option>EUR</option>
+              </select>
+            </div>
+          </div>
 
-  {/* 👇 TABLOYU SARAN SCROLL ALANI */}
-  <div className="coins-table-scroll">
-    <table className="table coins-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Asset</th>
-          <th>Price</th>
-          <th>24h</th>
-          <th>7d</th>
-          <th>Holdings</th>
-        </tr>
-      </thead>
-      <tbody>
-        {coins.map((coin, index) => {
-          const isActive =
-            selectedCoin && selectedCoin.symbol === coin.symbol;
+          <div className="coins-table-scroll">
+            <table className="table coins-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Asset</th>
+                  <th>Price</th>
+                  <th>24h</th>
+                  <th>7d</th>
+                  <th>Holdings</th>
+                </tr>
+              </thead>
+              <tbody>
+                {coins.map((coin, index) => {
+                  const isActive =
+                    selectedCoin && selectedCoin.symbol === coin.symbol;
 
-          return (
-            <tr
-              key={coin.symbol}
-              className={
-                isActive ? "coins-row coins-row--active" : "coins-row"
-              }
-              onClick={() => setSelectedCoin(coin)}
-            >
-              <td>{index + 1}</td>
-              <td>
-                <div className="table-asset">
-                  <div className="coin-avatar small">
-                    {coin.symbol[0]}
-                  </div>
-                  <div className="coin-name">
-                    {coin.name}{" "}
-                    <span className="coin-symbol">· {coin.symbol}</span>
-                  </div>
-                </div>
-              </td>
-              <td>${coin.price.toLocaleString()}</td>
-              <td>
-                <span
-                  className={
-                    "coin-change " +
-                    (coin.change24h >= 0
-                      ? "coin-change--up"
-                      : "coin-change--down")
-                  }
-                >
-                  {coin.change24h >= 0 ? "+" : ""}
-                  {coin.change24h.toFixed(2)}%
-                </span>
-              </td>
-              <td>
-                <span className="badge badge-outline">soon</span>
-              </td>
-              <td>
-                {coin.holdings != null ? (
-                  <span className="mono">
-                    {coin.holdings} {coin.symbol}
-                  </span>
-                ) : (
-                  "—"
-                )}
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  </div>
-</div>
-
+                  return (
+                    <tr
+                      key={coin.symbol}
+                      className={
+                        isActive ? "coins-row coins-row--active" : "coins-row"
+                      }
+                      onClick={() => setSelectedCoin(coin)}
+                    >
+                      <td>{index + 1}</td>
+                      <td>
+                        <div className="table-asset">
+                          <div className="coin-avatar small">
+                            {coin.symbol[0]}
+                          </div>
+                          <div className="coin-name">
+                            {coin.name}{" "}
+                            <span className="coin-symbol">· {coin.symbol}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>${coin.price.toLocaleString()}</td>
+                      <td>
+                        <span
+                          className={
+                            "coin-change " +
+                            (coin.change24h >= 0
+                              ? "coin-change--up"
+                              : "coin-change--down")
+                          }
+                        >
+                          {coin.change24h >= 0 ? "+" : ""}
+                          {coin.change24h.toFixed(2)}%
+                        </span>
+                      </td>
+                      <td>
+                        <span className="badge badge-outline">soon</span>
+                      </td>
+                      <td>
+                        {coin.holdings != null ? (
+                          <span className="mono">
+                            {coin.holdings} {coin.symbol}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <div className="page-card coins-chart-card">
           {selectedCoin ? (
@@ -865,7 +1060,6 @@ function HistoryPage({ history }) {
         </p>
       </div>
 
-      {/* Coins / Staking’teki gibi, tüm dikeyi kullanan layout */}
       <div className="history-layout">
         <div className="page-card history-card">
           <table className="table">
@@ -919,7 +1113,6 @@ function HistoryPage({ history }) {
     </div>
   );
 }
-
 
 // ---- PAGE: WALLET ----
 

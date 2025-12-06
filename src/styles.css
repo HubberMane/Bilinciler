@@ -99,7 +99,8 @@ body {
   color: var(--text-main);
   padding: 18px 24px;
   gap: 16px;
-  overflow: hidden;       /* Sayfanın kendisi scroll olmasın */
+  overflow-x: hidden;   /* yatay taşıyanı kes, */
+  overflow-y: auto;       /* Sayfanın kendisi scroll olmasın */
 
 
   background: radial-gradient(
@@ -767,9 +768,35 @@ body {
   height: 100%;
   min-height: 0;
 
-  position: relative;   /* stacking için iyi */
-  overflow: visible;    /* popup dışarı taşabilsin */
+  position: relative;
+  overflow: visible;   /* önemli */
+  z-index: 0;          /* yeni */
 }
+
+.coin-row {
+  position: relative;  /* zaten var ama bir daha vurguluyorum */
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: var(--bg-soft);
+  border: 0px solid rgba(30, 64, 175, 0.4);
+  cursor: default;
+  overflow: visible;
+  z-index: 1;          /* satır popup’ın üst katmanında */
+}
+
+.coin-popup {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%) translateX(-8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 999;        /* her şeyin üstünde olsun */
+}
+
 .agent-coins-scroll {
   flex: 1;
   min-height: 0;
@@ -784,7 +811,9 @@ body {
   scrollbar-color: rgba(15, 23, 42, 0.6) transparent;
 }
 
-
+.agent-coins-scroll::-webkit-scrollbar {
+  width: 8px;
+}
 
 .agent-coins-scroll::-webkit-scrollbar-track {
   background: transparent;
@@ -1041,7 +1070,6 @@ body {
 }
 
 /* STAKING */
-/* STAKING */
 
 .staking-layout {
   flex: 1;  /* Coins'teki .coins-page gibi, kalan tüm dikeyi kapla */
@@ -1103,8 +1131,6 @@ body {
   display: flex;
   flex-direction: column;
 }
-
-/* WALLET */
 
 /* WALLET */
 
@@ -1187,7 +1213,16 @@ body {
     grid-template-columns: minmax(0, 1fr);
   }
 }
-/* ORTAK SCROLLBAR STİLİ (chat + coins sidebar) */
+
+/* ========== GLOBAL COIN HOVER POPUP (SIDEBAR) ========== */
+
+.coin-hover-layer {
+  position: fixed;          /* viewport'a göre */
+  z-index: 9999;
+  pointer-events: none;     /* hover bozulmasın */
+  transform: translate(-100%, -50%); /* left noktasından sola ve ortalanmış */
+}
+
 .agent-chat-area,
 .coin-list--sidebar {
   scrollbar-width: thin;                           /* Firefox */
