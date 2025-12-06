@@ -1,0 +1,868 @@
+:root {
+  --bg-main: #020617;
+  --bg-elevated: #020617;
+  --bg-card: rgba(15, 23, 42, 0.95);
+  --bg-soft: rgba(15, 23, 42, 0.8);
+  --border-subtle: rgba(148, 163, 184, 0.15);
+  --accent: #22c55e;
+  --accent-soft: rgba(34, 197, 94, 0.1);
+  --accent-strong: #4ade80;
+  --danger: #ef4444;
+  --warning: #eab308;
+  --text-main: #e5e7eb;
+  --text-soft: #9ca3af;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-pill: 999px;
+  --shadow-card: 0 18px 35px rgba(15, 23, 42, 0.65);
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: radial-gradient(circle at top left, #0f172a 0, #020617 45%);
+  color: var(--text-main);
+}
+
+/* APP LAYOUT */
+
+.app-root {
+  display: flex;
+  min-height: 100vh;
+  color: var(--text-main);
+  background: radial-gradient(
+      circle at 0 0,
+      rgba(59, 130, 246, 0.35),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      rgba(34, 197, 94, 0.3),
+      transparent 45%
+    ),
+    #020617;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 24px;
+  gap: 16px;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+  width: 230px;
+  padding: 18px 16px;
+  border-right: 1px solid var(--border-subtle);
+  backdrop-filter: blur(24px);
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.95),
+    rgba(15, 23, 42, 0.9)
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px 16px;
+}
+
+.sidebar-logo-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: radial-gradient(circle at 0 0, #4ade80, #22c55e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #022c22;
+  box-shadow: 0 10px 22px rgba(34, 197, 94, 0.35);
+}
+
+.sidebar-logo-text span {
+  display: block;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.sidebar-logo-text small {
+  color: var(--text-soft);
+  font-size: 11px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.sidebar-nav-item {
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-soft);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.08s ease;
+}
+
+.sidebar-nav-item:hover {
+  background: rgba(15, 23, 42, 0.9);
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+.sidebar-nav-item--active {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.35),
+    rgba(59, 130, 246, 0.25)
+  );
+  color: #ecfdf5;
+}
+
+.sidebar-nav-icon {
+  width: 22px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 10px 6px 4px;
+}
+
+.sidebar-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid var(--border-subtle);
+  font-size: 11px;
+  color: var(--text-soft);
+}
+
+/* TOPBAR */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-radius: var(--radius-lg);
+  background: radial-gradient(circle at 0 0, rgba(34, 197, 94, 0.25), transparent 55%),
+    radial-gradient(circle at 100% 0, rgba(59, 130, 246, 0.3), transparent 50%),
+    rgba(15, 23, 42, 0.9);
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.topbar-left {
+  max-width: 60%;
+}
+
+.topbar-title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  letter-spacing: 0.01em;
+}
+
+.topbar-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.topbar-network {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid var(--border-subtle);
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.network-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.3);
+}
+
+.topbar-wallet {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wallet-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.wallet-address {
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+.wallet-balance {
+  font-size: 13px;
+  color: var(--accent-strong);
+}
+
+/* CONTENT */
+
+.app-content {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.page-header h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.page-header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.page-card {
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  padding: 16px 18px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+}
+
+/* BUTTONS */
+
+.btn {
+  border-radius: var(--radius-pill);
+  border: 0;
+  font-size: 13px;
+  padding: 8px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #022c22;
+  box-shadow: 0 12px 22px rgba(34, 197, 94, 0.45);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+.btn-secondary {
+  background: rgba(37, 99, 235, 0.16);
+  color: #bfdbfe;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+}
+
+.btn-ghost {
+  background: rgba(15, 23, 42, 0.85);
+  color: var(--text-soft);
+  border: 1px solid var(--border-subtle);
+}
+
+.btn-ghost:hover {
+  background: rgba(15, 23, 42, 1);
+}
+
+/* AGENT PAGE */
+
+.agent-page {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 2.3fr) minmax(260px, 0.9fr);
+  gap: 16px;
+}
+
+.agent-main {
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  padding: 14px 16px 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.agent-main--with-chart {
+  grid-template-columns: minmax(0, 1.05fr) minmax(260px, 0.9fr);
+}
+
+.agent-chat-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.agent-chat-header h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+.agent-chat-header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.agent-chat-messages {
+  flex: 1;
+  min-height: 220px;
+  max-height: 420px;
+  overflow: auto;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agent-chat-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agent-chat-input textarea {
+  resize: vertical;
+  min-height: 70px;
+  max-height: 140px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  padding: 8px 10px;
+  background: rgba(15, 23, 42, 0.9);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 13px;
+}
+
+/* CHAT BUBBLES */
+
+.chat-bubble {
+  padding: 8px 10px;
+  border-radius: 12px;
+  max-width: 90%;
+  font-size: 13px;
+}
+
+.chat-bubble--user {
+  margin-left: auto;
+  background: rgba(37, 99, 235, 0.25);
+  border-radius: 14px 14px 2px 14px;
+}
+
+.chat-bubble--agent {
+  margin-right: auto;
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 14px 14px 14px 2px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.chat-bubble-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+  font-size: 11px;
+  color: var(--text-soft);
+}
+
+.chat-bubble-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* AGENT CHART COLUMN */
+
+.agent-chart-column {
+  padding-left: 8px;
+}
+
+/* AGENT SIDE (COIN LIST) */
+
+.agent-side {
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  padding: 12px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agent-side-header h3 {
+  margin: 0 0 2px;
+  font-size: 15px;
+}
+
+.agent-side-header p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+/* COIN LIST */
+
+.coin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.coin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 8px;
+  border-radius: var(--radius-md);
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(30, 64, 175, 0.3);
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.12s ease,
+    background 0.12s ease;
+}
+
+.coin-row:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.7);
+  background: rgba(15, 23, 42, 1);
+}
+
+.coin-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.coin-row-right {
+  font-size: 13px;
+}
+
+.coin-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 0 0, #4ade80, #22c55e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #022c22;
+}
+
+.coin-avatar.small {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+}
+
+.coin-name {
+  font-size: 13px;
+}
+
+.coin-price {
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.coin-change {
+  font-size: 12px;
+  padding: 3px 7px;
+  border-radius: 999px;
+}
+
+.coin-change--up {
+  background: rgba(22, 163, 74, 0.15);
+  color: #bbf7d0;
+}
+
+.coin-change--down {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fecaca;
+}
+
+/* COIN CHART */
+
+.coin-chart {
+  border-radius: var(--radius-md);
+  background: radial-gradient(
+      circle at 0 0,
+      rgba(59, 130, 246, 0.35),
+      transparent 55%
+    ),
+    rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  padding: 10px 10px 12px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.coin-chart-header h3 {
+  margin: 0 0 2px;
+  font-size: 15px;
+}
+
+.coin-chart-price-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.coin-chart-price {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.coin-chart-caption {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: var(--text-soft);
+}
+
+.coin-chart-body {
+  margin-top: 4px;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.coin-chart-bar {
+  flex: 1;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(
+    180deg,
+    rgba(129, 140, 248, 0.95),
+    rgba(30, 64, 175, 0.1)
+  );
+}
+
+.coin-chart-footer {
+  margin-top: 4px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-soft);
+}
+
+/* TABLES */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead th {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-soft);
+  font-weight: 500;
+}
+
+.table tbody td {
+  padding: 7px 6px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.9);
+}
+
+.table-asset {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* BADGES */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.badge-success {
+  background: rgba(22, 163, 74, 0.18);
+  color: #bbf7d0;
+}
+
+.badge-warning {
+  background: rgba(250, 204, 21, 0.18);
+  color: #fef9c3;
+}
+
+.badge-danger {
+  background: rgba(248, 113, 113, 0.18);
+  color: #fee2e2;
+}
+
+.badge-outline {
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  color: var(--text-soft);
+  margin-left: 6px;
+}
+
+/* NFT PAGE */
+
+.nft-creator {
+  margin-bottom: 10px;
+}
+
+.nft-prompt-input {
+  width: 100%;
+  margin-top: 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  padding: 8px 10px;
+  background: rgba(15, 23, 42, 0.95);
+  color: var(--text-main);
+  font-size: 13px;
+  resize: vertical;
+  min-height: 70px;
+}
+
+.nft-creator-actions {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.helper-text {
+  font-size: 11px;
+  color: var(--text-soft);
+}
+
+.nft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+
+.nft-card {
+  border-radius: var(--radius-md);
+  background: var(--bg-soft);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.nft-image-wrapper img {
+  display: block;
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+}
+
+.nft-body {
+  padding: 8px 10px;
+}
+
+.nft-body h3 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.nft-desc {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.nft-prompt {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-soft);
+}
+
+.nft-prompt span {
+  color: var(--accent-strong);
+}
+
+.nft-footer {
+  padding: 7px 10px 8px;
+  border-top: 1px solid rgba(15, 23, 42, 0.9);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nft-apy {
+  font-size: 11px;
+  color: var(--accent-strong);
+}
+
+/* STAKING */
+
+.staking-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.staking-column h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.staking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.staking-row {
+  padding: 7px 8px;
+  border-radius: var(--radius-md);
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(30, 64, 175, 0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.staking-title {
+  font-size: 13px;
+}
+
+.staking-sub {
+  font-size: 11px;
+  color: var(--text-soft);
+}
+
+/* HISTORY */
+
+.history-prompt {
+  font-size: 11px;
+  color: var(--text-soft);
+}
+
+/* WALLET */
+
+.wallet-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.6fr);
+  gap: 12px;
+}
+
+.wallet-address-big {
+  margin: 4px 0 4px;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.wallet-balance-big {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent-strong);
+}
+
+.empty-text {
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+/* MISC */
+
+.badge-success {
+  background: rgba(34, 197, 94, 0.18);
+  color: #bbf7d0;
+}
+
+/* RESPONSIVE (basic) */
+
+@media (max-width: 1024px) {
+  .sidebar {
+    display: none;
+  }
+
+  .app-main {
+    padding: 12px;
+  }
+
+  .topbar-left {
+    max-width: 100%;
+  }
+
+  .agent-page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .agent-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wallet-layout,
+  .staking-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
