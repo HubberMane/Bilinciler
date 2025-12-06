@@ -1,36 +1,53 @@
 import "./styles.css";
 import React, { useState, useEffect, useRef } from "react";
+import { ConnectButton } from "@mysten/wallet-kit";
+import { useEnokiFlow, useZkLogin, useAuthCallback } from "@mysten/enoki/react";
 
 // ---- COINMARKETCAP HELPERS ----
 
 const CMC_ENDPOINT =
-  "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=100&convert=USD";
+  "/api/v1/cryptocurrency/listings/latest?start=1&limit=50&convert=USD";
 
-// CoinMarketCap -> bizim COINS yapısına çevir
-function mapCMCToCoin(cmcCoin) {
-  const usd = cmcCoin.quote?.USD || {};
+async function fetchCoinsFromCMC() {
+  try {
+    const response = await fetch(CMC_ENDPOINT, {
+      headers: {
+        "X-CMC_PRO_API_KEY": import.meta.env.VITE_CMC_API_KEY,
+      },
+    });
 
+    if (!response.ok) {
+      console.error("CMC API ERROR:", response.status, await response.text());
+      return [];
+    }
+
+    const data = await response.json();
+    return data.data.map(mapCMCToCoin);
+
+  } catch (err) {
+    console.error("CMC FETCH ERROR:", err);
+    return [];
+  }
+}
+
+function mapCMCToCoin(coin) {
+  const quote = coin.quote?.USD || {};
   return {
-    name: cmcCoin.name,
-    symbol: cmcCoin.symbol,
-    price: usd.price ?? 0,
-    change24h: usd.percent_change_24h ?? 0,
-    change7d: usd.percent_change_7d ?? 0,
-    marketCap: formatBigNumber(usd.market_cap),
-    volume24h: formatBigNumber(usd.volume_24h),
-    dominance:
-      usd.market_cap_dominance != null
-        ? `${usd.market_cap_dominance.toFixed(2)}%`
-        : "—",
-    circulatingSupply: cmcCoin.circulating_supply
-      ? `${cmcCoin.circulating_supply.toLocaleString()} ${cmcCoin.symbol}`
-      : "—",
-
-    // Şimdilik sahte sparkline, UI bozulmasın diye
-    sparkline: generateFakeSparkline(usd.percent_change_24h),
-    holdings: null, // gerçek wallet verisiyle doldurursun
+    name: coin.name,
+    symbol: coin.symbol,
+    price: quote.price || 0,
+    change24h: quote.percent_change_24h || 0,
+    change7d: quote.percent_change_7d || 0,
+    marketCap: formatBigNumber(quote.market_cap),
+    volume24h: formatBigNumber(quote.volume_24h),
+    dominance: (quote.market_cap_dominance || 0).toFixed(1) + "%",
+    circulatingSupply:
+      formatBigNumber(coin.circulating_supply) + " " + coin.symbol,
+    sparkline: generateFakeSparkline(quote.percent_change_24h || 0),
+    holdings: null,
   };
 }
+
 
 function formatBigNumber(n) {
   if (!n && n !== 0) return "—";
@@ -56,6 +73,33 @@ function generateFakeSparkline(change24h = 0) {
   return arr;
 }
 
+function generateFakeHistoryData(range, basePrice) {
+  // Range'e göre farklı veri noktası sayısı ve oynaklık simüle et
+  let steps = 20;
+  let volatility = 0.05; // %5
+
+  switch (range) {
+    case "1D": steps = 24; volatility = 0.02; break;
+    case "1W": steps = 7; volatility = 0.05; break;
+    case "1M": steps = 30; volatility = 0.10; break;
+    case "1Y": steps = 12; volatility = 0.20; break;
+    case "ALL": steps = 50; volatility = 0.50; break;
+  }
+
+  const arr = [];
+  let current = basePrice;
+
+  for (let i = 0; i < steps; i++) {
+    // Rastgele artış/azalış (-0.5 ile 0.5 arası * volatility)
+    const change = (Math.random() - 0.5) * volatility;
+    current = current * (1 + change);
+    arr.push(current);
+  }
+  return arr;
+}
+
+
+
 // ---- PAGES ----
 const PAGES = {
   AGENT: "agent",
@@ -64,6 +108,8 @@ const PAGES = {
   HISTORY: "history",
   WALLET: "wallet",
 };
+
+// ... FALLBACK COINS will be rendered below this (was lines 110-374) ...
 
 // ---- MOCK DATA (FALLBACK) ----
 const FALLBACK_COINS = [
@@ -350,6 +396,33 @@ function App() {
   const [nfts, setNfts] = useState(INITIAL_NFTS);
   const [history] = useState(MOCK_HISTORY);
 
+  // Enoki Hooks
+  const enokiFlow = useEnokiFlow();
+  const { address: enokiAddress } = useZkLogin();
+  const { handled } = useAuthCallback(); // Handle Google Redirect
+
+  // Google Login Function
+  const handleGoogleLogin = async () => {
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    const redirectUrl = `${protocol}//${host}/`; // Redirect back to root
+
+    try {
+      const url = await enokiFlow.createAuthorizationURL({
+        provider: "google",
+        network: "testnet",
+        clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        redirectUrl: redirectUrl,
+        extraParams: {
+          scope: ["openid", "email", "profile"],
+        },
+      });
+      window.location.href = url;
+    } catch (error) {
+      console.error("Google Login Error:", error);
+    }
+  };
+
   useEffect(() => {
     let API_KEY;
 
@@ -398,26 +471,7 @@ function App() {
 
         let data = json?.data || [];
 
-        const watchList = [
-          "BTC",
-          "ETH",
-          "USDT",
-          "SUI",
-          "SOL",
-          "BNB",
-          "AVAX",
-          "XRP",
-          "DOGE",
-          "ADA",
-          "DOT",
-          "LINK",
-          "UNI",
-          "LTC",
-          "PEPE",
-          "TON",
-        ];
 
-        data = data.filter((c) => watchList.includes(c.symbol));
 
         const mapped = data.map(mapCMCToCoin);
 
@@ -475,6 +529,8 @@ function App() {
           onConnectWallet={handleConnectWallet}
           theme={theme}
           onToggleTheme={handleToggleTheme}
+          onGoogleLogin={handleGoogleLogin}
+          enokiAddress={enokiAddress}
         />
 
         {coinsError && (
@@ -546,7 +602,7 @@ function Sidebar({ activePage, onChangePage }) {
   );
 }
 
-function Topbar({ wallet, onConnectWallet, theme, onToggleTheme }) {
+function Topbar({ wallet, onConnectWallet, theme, onToggleTheme, onGoogleLogin, enokiAddress }) {
   return (
     <header className="topbar">
       <div className="topbar-left">
@@ -565,6 +621,33 @@ function Topbar({ wallet, onConnectWallet, theme, onToggleTheme }) {
           <span className="network-label">Sui Network</span>
         </div>
         <div className="topbar-wallet">
+          {enokiAddress ? (
+            <div className="wallet-info" style={{ marginRight: '10px' }}>
+              <span className="wallet-balance" style={{ fontSize: '10px', color: '#999' }}>zkLogin</span>
+              <span className="wallet-address" title={enokiAddress}>
+                {enokiAddress.slice(0, 6)}...{enokiAddress.slice(-4)}
+              </span>
+            </div>
+          ) : (
+            <button
+              onClick={onGoogleLogin}
+              className="btn btn-secondary"
+              style={{
+                marginRight: '10px',
+                fontSize: '13px',
+                padding: '8px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.8-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81z" />
+              </svg>
+              Google
+            </button>
+          )}
+
           {wallet.connected ? (
             <>
               <div className="wallet-info">
@@ -606,6 +689,8 @@ function AgentPage({ coins }) {
   const [hoveredCoin, setHoveredCoin] = useState(null);
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
 
+  const leaveTimeoutRef = useRef(null);
+
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
@@ -643,17 +728,51 @@ function AgentPage({ coins }) {
 
   // Sidebar coin hover handler'ları
   const handleCoinHover = (coin, rect) => {
-    const GAP = 12;
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
+      leaveTimeoutRef.current = null;
+    }
 
+    const GAP = 12;
     const x = rect.left - GAP;
-    const y = rect.top + rect.height / 2;
+    let y = rect.top + rect.height / 2;
+
+    // Ekran taşmasını önleme mantığı
+    const viewportHeight = window.innerHeight;
+    const ESTIMATED_HEIGHT = 240; // Popup tahmini yüksekliği (expanded hali)
+    const PADDING = 20;
+
+    // Alt sınırdan taşıyorsa yukarı kaydır
+    if (y + ESTIMATED_HEIGHT / 2 > viewportHeight - PADDING) {
+      y = viewportHeight - ESTIMATED_HEIGHT / 2 - PADDING;
+    }
+
+    // Üst sınırdan taşıyorsa aşağı kaydır (nadir ama mümkün)
+    if (y - ESTIMATED_HEIGHT / 2 < PADDING) {
+      y = ESTIMATED_HEIGHT / 2 + PADDING;
+    }
 
     setHoveredCoin(coin);
     setHoverPos({ x, y });
   };
 
   const handleCoinLeave = () => {
-    setHoveredCoin(null);
+    leaveTimeoutRef.current = setTimeout(() => {
+      setHoveredCoin(null);
+    }, 300);
+  };
+
+  const handlePopupEnter = () => {
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
+      leaveTimeoutRef.current = null;
+    }
+  };
+
+  const handlePopupLeave = () => {
+    leaveTimeoutRef.current = setTimeout(() => {
+      setHoveredCoin(null);
+    }, 300);
   };
 
   return (
@@ -717,7 +836,9 @@ function AgentPage({ coins }) {
       {hoveredCoin && (
         <div
           className="coin-hover-layer"
-          style={{ top: hoverPos.y, left: hoverPos.x }}
+          style={{ top: hoverPos.y, left: hoverPos.x, pointerEvents: 'auto' }}
+          onMouseEnter={handlePopupEnter}
+          onMouseLeave={handlePopupLeave}
         >
           <CoinMiniChart coin={hoveredCoin} />
         </div>
@@ -728,26 +849,123 @@ function AgentPage({ coins }) {
 
 // ---- COIN LIST + MINI CHART ----
 
+// ---- CHART HELPERS ----
+
+function getChartColor(change) {
+  // Pozitif veya 0 ise yeşil, negatif ise kırmızı
+  return change >= 0 ? "#10b981" : "#ef4444";
+}
+
+function normalizeDataToPoints(data, width, height) {
+  if (!data || data.length === 0) return "";
+
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1; // 0'a bölünmeyi önle
+
+  const stepX = width / (data.length - 1);
+
+  const points = data.map((val, i) => {
+    const x = i * stepX;
+    // Y ekseni ters (üst 0), bu yüzden (1 - normalized) yapıyoruz
+    // Kenarlardan biraz boşluk bırakmak (padding) iyi olabilir ama basitlik için tam boyut kullanıyoruz
+    const normalizedY = (val - min) / range;
+    const y = height - normalizedY * height;
+    return { x, y, val };
+  });
+
+  return points;
+}
+
+// ---- COIN LIST + MINI CHART ----
+
 function CoinMiniChart({ coin }) {
-  const data = coin.sparkline || [30, 40, 35, 45, 50, 55, 60];
+  const [activeRange, setActiveRange] = useState("1D");
+  const [chartData, setChartData] = useState(coin.sparkline || []);
+
+  useEffect(() => {
+    setActiveRange("1D");
+  }, [coin.symbol]);
+
+  useEffect(() => {
+    if (activeRange === "1D") {
+      setChartData(coin.sparkline || generateFakeSparkline(coin.change24h));
+    } else {
+      setChartData(generateFakeHistoryData(activeRange, coin.price));
+    }
+  }, [activeRange, coin]);
+
+  const firstVal = chartData[0] || 0;
+  const lastVal = chartData[chartData.length - 1] || 0;
+  const change = activeRange === "1D" ? coin.change24h : ((lastVal - firstVal) / firstVal) * 100;
+  const color = getChartColor(change);
+
+  // SVG boyutları - Responsive olması için viewBox kullanacağız
+  const width = 260; // Daha geniş
+  const height = 80; // Daha yüksek
+
+  const points = normalizeDataToPoints(chartData, width, height);
+  const polylinePoints = points.map(p => `${p.x},${p.y}`).join(" ");
+
+  const ranges = ["1D", "1W", "1M", "1Y", "ALL"];
 
   return (
-    <div className="coin-popup-inner">
-      <div className="coin-popup-header">
-        <span>
-          {coin.name} ({coin.symbol})
-        </span>
-        <span>${coin.price.toLocaleString()}</span>
+    <div className="coin-popup-inner" style={{ minWidth: 280, padding: 16 }}>
+      <div className="coin-popup-header" style={{ marginBottom: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{coin.name} ({coin.symbol})</span>
+          <span style={{ fontSize: '0.85em', opacity: 0.7 }}>{activeRange} Trend</span>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ color, fontWeight: 'bold', fontSize: '1.1em' }}>${coin.price.toLocaleString()}</div>
+          <div style={{ fontSize: '0.85em', color }}>
+            {change >= 0 ? "+" : ""}{change.toFixed(2)}%
+          </div>
+        </div>
       </div>
-      <div className="coin-popup-body">
-        {data.map((v, i) => (
-          <div
-            key={i}
-            className="coin-popup-bar"
-            style={{ height: `${v}%` }}
+
+      <div className="coin-popup-body" style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}>
+        <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%", height: "auto", maxWidth: "100%", overflow: "visible" }}>
+          <polyline
+            points={polylinePoints}
+            fill="none"
+            stroke={color}
+            strokeWidth="3"
           />
+          {points.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r="3"
+              fill={color}
+            />
+          ))}
+        </svg>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 6, padding: 4 }}>
+        {ranges.map(r => (
+          <button
+            key={r}
+            className={`btn btn-sm ${activeRange === r ? 'btn-primary' : 'btn-ghost'}`}
+            onClick={(e) => {
+              e.stopPropagation(); // Parent clickleri engelle
+              setActiveRange(r);
+            }}
+            style={{
+              padding: '4px 8px',
+              fontSize: '11px',
+              minWidth: 'unset',
+              height: '24px',
+              borderRadius: 4
+            }}
+          >
+            {r}
+          </button>
         ))}
       </div>
+
     </div>
   );
 }
@@ -784,7 +1002,35 @@ function CoinList({ coins, onHover, onLeave }) {
 // ---- COIN DETAIL CHART ----
 
 function CoinDetailChart({ coin }) {
-  const data = coin.sparkline || [40, 55, 50, 70, 65, 80, 75, 90];
+  const [activeRange, setActiveRange] = useState("1D");
+  const [chartData, setChartData] = useState(coin.sparkline || []);
+
+  // Aralık değiştiğinde veya coin değiştiğinde veriyi güncelle
+  useEffect(() => {
+    if (activeRange === "1D") {
+      // 1D için orijinal veriyi veya mock veriyi kullan
+      setChartData(coin.sparkline || generateFakeSparkline(coin.change24h));
+    } else {
+      // Diğer aralıklar için rastgele veri üret
+      setChartData(generateFakeHistoryData(activeRange, coin.price));
+    }
+  }, [activeRange, coin]);
+
+  // Son verilere göre değişim (mock)
+  const firstVal = chartData[0] || 0;
+  const lastVal = chartData[chartData.length - 1] || 0;
+  // Eğer 1D ise api'den gelen change24h'yi kullan, değilse hesapla
+  const change = activeRange === "1D" ? coin.change24h : ((lastVal - firstVal) / firstVal) * 100;
+  const color = getChartColor(change);
+
+  // SVG boyutları
+  const width = 600;
+  const height = 200;
+
+  const points = normalizeDataToPoints(chartData, width, height);
+  const polylinePoints = points.map(p => `${p.x},${p.y}`).join(" ");
+
+  const ranges = ["1D", "1W", "1M", "1Y", "ALL"];
 
   return (
     <div className="coin-chart">
@@ -796,29 +1042,39 @@ function CoinDetailChart({ coin }) {
           <div className="coin-chart-price">
             ${coin.price.toLocaleString()}
           </div>
-          <div
-            className={
-              "coin-change " +
-              (coin.change24h >= 0 ? "coin-change--up" : "coin-change--down")
-            }
-          >
-            {coin.change24h >= 0 ? "+" : ""}
-            {coin.change24h.toFixed(2)}%
+          <div className="coin-change" style={{ color }}>
+            {change >= 0 ? "+" : ""}
+            {change.toFixed(2)}%
+            <span style={{ fontSize: "0.8em", opacity: 0.7, marginLeft: 4 }}>
+              ({activeRange})
+            </span>
           </div>
         </div>
         <p className="coin-chart-caption">
-          Mock 1D sparkline — later connect to real price history.
+          Live sparkline visualization
         </p>
       </div>
 
-      <div className="coin-chart-body">
-        {data.map((v, i) => (
-          <div
-            key={i}
-            className="coin-chart-bar"
-            style={{ height: `${v}%` }}
+      <div className="coin-chart-body" style={{ height: "auto", minHeight: "220px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%", height: "100%", overflow: "visible" }}>
+          <polyline
+            points={polylinePoints}
+            fill="none"
+            stroke={color}
+            strokeWidth="3"
           />
-        ))}
+          {points.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r="4"
+              fill="#1e293b"
+              stroke={color}
+              strokeWidth="2"
+            />
+          ))}
+        </svg>
       </div>
 
       <div className="coin-chart-stats">
@@ -841,10 +1097,16 @@ function CoinDetailChart({ coin }) {
       </div>
 
       <div className="coin-chart-footer">
-        <span>1D</span>
-        <span>1W</span>
-        <span>1M</span>
-        <span>1Y</span>
+        {ranges.map(r => (
+          <button
+            key={r}
+            className={`btn btn-sm ${activeRange === r ? 'btn-primary' : 'btn-ghost'}`}
+            onClick={() => setActiveRange(r)}
+            style={{ minWidth: 40 }}
+          >
+            {r}
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -1088,8 +1350,8 @@ function HistoryPage({ history }) {
                         (tx.status === "Success"
                           ? "badge-success"
                           : tx.status === "Pending"
-                          ? "badge-warning"
-                          : "badge-danger")
+                            ? "badge-warning"
+                            : "badge-danger")
                       }
                     >
                       {tx.status}

@@ -2,8 +2,8 @@
   /* Palette */
   --first-color: #8ef6e4;
   --second-color: #9896f1;
-  --third-color: #a5bdfd;
-  --fourth-color: #a5bdfd;
+  --third-color: #12003b;
+  --fourth-color: #12003b;
 
   /* Default (dark) – tema sınıfları aşağıda override ediyor */
   --bg-main: #020617;
@@ -33,12 +33,15 @@
 
 /* Tema varyantları */
 .theme-dark {
-  --bg-main: #a5bdfd;        /* bunu sen zaten böyle yapmışsın, dokunmuyorum */
+  --bg-main: #131321 ;
+  /* bunu sen zaten böyle yapmışsın, dokunmuyorum */
   --bg-elevated: #9896f1;
 
   /* BLOKLARI ŞEFFAF YAPAN KISIM */
-  --bg-card: rgba(15, 23, 42, 0.55);  /* önce 0.97 idi */
-  --bg-soft: rgba(15, 23, 42, 0.35);  /* önce 0.9 idi */
+  --bg-card: rgba(15, 23, 42, 0.55);
+  /* önce 0.97 idi */
+  --bg-soft: rgba(15, 23, 42, 0.35);
+  /* önce 0.9 idi */
 
   --border-subtle: rgba(148, 163, 184, 0.35);
   --text-main: #e5e7eb;
@@ -51,12 +54,12 @@
 
 
 .theme-light {
-  --bg-main: #f8fcfb;
+  --bg-main: #bdbbd7 ;
   --bg-elevated: #c9fdd7;
 
   /* Light tarafta yarı saydam kartlar */
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --bg-soft: rgba(229, 247, 243, 0.7);
+  --bg-card: #bfbed4;
+  --bg-soft: #bfbed473 ;
 
   --border-subtle: rgba(15, 23, 42, 0.08);
   --text-main: #102a43;
@@ -94,25 +97,24 @@ body {
 
 .app-root {
   display: flex;
-  height: 100vh;          /* EKRANA KİLİTLE */
+  height: 100vh;
+  /* EKRANA KİLİTLE */
   min-height: 100vh;
   color: var(--text-main);
   padding: 18px 24px;
   gap: 16px;
-  overflow-x: hidden;   /* yatay taşıyanı kes, */
-  overflow-y: auto;       /* Sayfanın kendisi scroll olmasın */
+  overflow-x: hidden;
+  /* yatay taşıyanı kes, */
+  overflow-y: auto;
+  /* Sayfanın kendisi scroll olmasın */
 
 
-  background: radial-gradient(
-      circle at 0 0,
+  background: radial-gradient(circle at 0 0,
       rgba(121, 209, 195, 0.25),
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 100% 100%,
+      transparent 40%),
+    radial-gradient(circle at 100% 100%,
       rgba(104, 146, 213, 0.45),
-      transparent 45%
-    ),
+      transparent 45%),
     var(--bg-main);
 }
 
@@ -120,8 +122,10 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 16px;    /* sadece bloklar arası mesafe */
-  padding: 0;   /* dış boşluğu artık .app-root veriyor */
+  gap: 16px;
+  /* sadece bloklar arası mesafe */
+  padding: 0;
+  /* dış boşluğu artık .app-root veriyor */
   min-height: 0;
 }
 
@@ -131,7 +135,8 @@ body {
 .sidebar {
   /* width: 280px;  <-- BUNU SİL */
 
-  width: clamp(220px, 22vw, 300px);  /* min 220px, max 300px, ortası ekran genişliğine göre */
+  width: clamp(220px, 22vw, 300px);
+  /* min 220px, max 300px, ortası ekran genişliğine göre */
   padding: 18px 24px;
 
   border-radius: var(--radius-lg);
@@ -245,16 +250,12 @@ body {
   align-items: center;
   padding: 14px 18px;
   border-radius: var(--radius-lg);
-  background: radial-gradient(
-      circle at 0 0,
+  background: radial-gradient(circle at 0 0,
       rgba(121, 209, 195, 0.2),
-      transparent 55%
-    ),
-    radial-gradient(
-      circle at 100% 0,
+      transparent 55%),
+    radial-gradient(circle at 100% 0,
       rgba(104, 146, 213, 0.35),
-      transparent 50%
-    ),
+      transparent 50%),
     var(--bg-card);
   box-shadow: var(--shadow-card);
   border: 1px solid var(--border-subtle);
@@ -341,8 +342,10 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 16px;   /* 14 yerine 16 */
+  gap: 16px;
+  /* 14 yerine 16 */
 }
+
 .page-header {
   border-radius: var(--radius-lg);
   background: var(--bg-card);
@@ -525,11 +528,9 @@ body {
 
 .coin-chart {
   border-radius: var(--radius-md);
-  background: radial-gradient(
-      circle at 0 0,
+  background: radial-gradient(circle at 0 0,
       rgba(104, 146, 213, 0.35),
-      transparent 55%
-    ),
+      transparent 55%),
     var(--bg-card);
   border: 1px solid rgba(104, 146, 213, 0.5);
   padding: 10px 10px 12px;
@@ -573,11 +574,9 @@ body {
 .coin-chart-bar {
   flex: 1;
   border-radius: 6px 6px 0 0;
-  background: linear-gradient(
-    180deg,
-    rgba(129, 140, 248, 0.95),
-    rgba(30, 64, 175, 0.1)
-  );
+  background: linear-gradient(180deg,
+      rgba(129, 140, 248, 0.95),
+      rgba(30, 64, 175, 0.1));
 }
 
 .coin-chart-footer {
@@ -593,11 +592,9 @@ body {
 .stats-card {
   border-radius: var(--radius-lg);
   padding: 10px 12px;
-  background: radial-gradient(
-      circle at 0 0,
+  background: radial-gradient(circle at 0 0,
       rgba(104, 146, 213, 0.45),
-      transparent 55%
-    ),
+      transparent 55%),
     var(--bg-card);
   border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-card);
@@ -641,8 +638,10 @@ body {
   gap: 16px;
 
   /* EKLEDİKLERİM: */
-  height: 100%;    /* app-content yüksekliğini tamamen kullan */
-  min-height: 0;   /* içerik taşıp parent’i şişirmesin */
+  height: 100%;
+  /* app-content yüksekliğini tamamen kullan */
+  min-height: 0;
+  /* içerik taşıp parent’i şişirmesin */
 }
 
 
@@ -681,7 +680,8 @@ body {
 .agent-chat-area {
   flex: 1;
   /* min-height: 260px;  <-- İstersen kaldır ya da küçült */
-  min-height: 0;          /* parent yükseklikle sınırlı kalsın */
+  min-height: 0;
+  /* parent yükseklikle sınırlı kalsın */
   max-height: 100%;
   overflow-y: auto;
   padding-right: 4px;
@@ -769,12 +769,15 @@ body {
   min-height: 0;
 
   position: relative;
-  overflow: visible;   /* önemli */
-  z-index: 0;          /* yeni */
+  overflow: visible;
+  /* önemli */
+  z-index: 0;
+  /* yeni */
 }
 
 .coin-row {
-  position: relative;  /* zaten var ama bir daha vurguluyorum */
+  position: relative;
+  /* zaten var ama bir daha vurguluyorum */
   display: flex;
   align-items: center;
   padding: 8px 10px;
@@ -783,7 +786,8 @@ body {
   border: 0px solid rgba(30, 64, 175, 0.4);
   cursor: default;
   overflow: visible;
-  z-index: 1;          /* satır popup’ın üst katmanında */
+  z-index: 1;
+  /* satır popup’ın üst katmanında */
 }
 
 .coin-popup {
@@ -794,14 +798,17 @@ body {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.12s ease, transform 0.12s ease;
-  z-index: 999;        /* her şeyin üstünde olsun */
+  z-index: 999;
+  /* her şeyin üstünde olsun */
 }
 
 .agent-coins-scroll {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;      /* dikey scroll burada */
-  overflow-x: visible;   /* popup sola taşabilsin */
+  overflow-y: auto;
+  /* dikey scroll burada */
+  overflow-x: visible;
+  /* popup sola taşabilsin */
   padding-right: 4px;
 }
 
@@ -822,20 +829,16 @@ body {
 
 .agent-coins-scroll::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: linear-gradient(
-    180deg,
-    rgba(15, 23, 42, 0.9),
-    rgba(37, 99, 235, 0.4)
-  );
+  background: linear-gradient(180deg,
+      rgba(15, 23, 42, 0.9),
+      rgba(37, 99, 235, 0.4));
   border: 1px solid rgba(148, 163, 184, 0.4);
 }
 
 .agent-coins-scroll::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    180deg,
-    rgba(15, 23, 42, 1),
-    rgba(59, 130, 246, 0.55)
-  );
+  background: linear-gradient(180deg,
+      rgba(15, 23, 42, 1),
+      rgba(59, 130, 246, 0.55));
 }
 
 
@@ -863,6 +866,7 @@ body {
   flex-direction: column;
   gap: 6px;
 }
+
 .coins-table-card {
   display: flex;
   flex-direction: column;
@@ -973,11 +977,9 @@ body {
   width: 450px;
   border-radius: var(--radius-lg);
   padding: 14px 14px;
-  background: radial-gradient(
-      circle at 0 0,
+  background: radial-gradient(circle at 0 0,
       rgba(104, 146, 213, 0.4),
-      transparent 60%
-    ),
+      transparent 60%),
     var(--bg-card);
   border: 1px solid rgba(104, 146, 213, 0.65);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 1);
@@ -1001,11 +1003,9 @@ body {
 .coin-popup-bar {
   flex: 1;
   border-radius: 6px 6px 0 0;
-  background: linear-gradient(
-    180deg,
-    rgba(129, 140, 248, 0.95),
-    rgba(30, 64, 175, 0.1)
-  );
+  background: linear-gradient(180deg,
+      rgba(129, 140, 248, 0.95),
+      rgba(30, 64, 175, 0.1));
 }
 
 /* TABLES */
@@ -1072,18 +1072,24 @@ body {
 /* STAKING */
 
 .staking-layout {
-  flex: 1;  /* Coins'teki .coins-page gibi, kalan tüm dikeyi kapla */
+  flex: 1;
+  /* Coins'teki .coins-page gibi, kalan tüm dikeyi kapla */
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;              /* coins-page ile aynı boşluk */
-  align-items: stretch;   /* iki kart aynı yüksekliğe uzansın */
-  min-height: 420px;      /* coins-page ile aynı min-height */
+  gap: 16px;
+  /* coins-page ile aynı boşluk */
+  align-items: stretch;
+  /* iki kart aynı yüksekliğe uzansın */
+  min-height: 420px;
+  /* coins-page ile aynı min-height */
 }
 
 .staking-column {
-  height: 100%;           /* grid hücresinin tamamını doldursun */
+  height: 100%;
+  /* grid hücresinin tamamını doldursun */
   display: flex;
-  flex-direction: column; /* içeriği dikeyde düzgün hizala */
+  flex-direction: column;
+  /* içeriği dikeyde düzgün hizala */
 }
 
 
@@ -1118,16 +1124,20 @@ body {
 /* HISTORY – coins / staking gibi tam panel */
 
 .history-layout {
-  flex: 1;                        /* page içinde kalan dikeyi kapla */
+  flex: 1;
+  /* page içinde kalan dikeyi kapla */
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 16px;                      /* diğer sayfalarla uyumlu boşluk */
+  gap: 16px;
+  /* diğer sayfalarla uyumlu boşluk */
   align-items: stretch;
-  min-height: 420px;              /* coins-page ile uyum */
+  min-height: 420px;
+  /* coins-page ile uyum */
 }
 
 .history-card {
-  height: 100%;                   /* grid hücresinin tamamını doldursun */
+  height: 100%;
+  /* grid hücresinin tamamını doldursun */
   display: flex;
   flex-direction: column;
 }
@@ -1135,16 +1145,20 @@ body {
 /* WALLET */
 
 .wallet-layout {
-  flex: 1;  /* page içinde kalan dikeyi kapla */
+  flex: 1;
+  /* page içinde kalan dikeyi kapla */
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.6fr);
   gap: 16px;
-  align-items: stretch;   /* kartlar dikeyde tam uzasın */
-  min-height: 420px;      /* coins-page / staking ile uyumlu */
+  align-items: stretch;
+  /* kartlar dikeyde tam uzasın */
+  min-height: 420px;
+  /* coins-page / staking ile uyumlu */
 }
 
 .wallet-card {
-  height: 100%;           /* grid hücresini tamamen doldur */
+  height: 100%;
+  /* grid hücresini tamamen doldur */
   display: flex;
   flex-direction: column;
 }
@@ -1217,15 +1231,19 @@ body {
 /* ========== GLOBAL COIN HOVER POPUP (SIDEBAR) ========== */
 
 .coin-hover-layer {
-  position: fixed;          /* viewport'a göre */
+  position: fixed;
+  /* viewport'a göre */
   z-index: 9999;
-  pointer-events: none;     /* hover bozulmasın */
-  transform: translate(-100%, -50%); /* left noktasından sola ve ortalanmış */
+  pointer-events: none;
+  /* hover bozulmasın */
+  transform: translate(-100%, -50%);
+  /* left noktasından sola ve ortalanmış */
 }
 
 .agent-chat-area,
 .coin-list--sidebar {
-  scrollbar-width: thin;                           /* Firefox */
+  scrollbar-width: thin;
+  /* Firefox */
   scrollbar-color: rgba(15, 23, 42, 0.6) transparent;
 }
 
@@ -1243,19 +1261,15 @@ body {
 .agent-chat-area::-webkit-scrollbar-thumb,
 .coin-list--sidebar::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: linear-gradient(
-    180deg,
-    rgba(15, 23, 42, 0.9),
-    rgba(37, 99, 235, 0.4)
-  );
+  background: linear-gradient(180deg,
+      rgba(15, 23, 42, 0.9),
+      rgba(37, 99, 235, 0.4));
   border: 1px solid rgba(148, 163, 184, 0.4);
 }
 
 .agent-chat-area::-webkit-scrollbar-thumb:hover,
 .coin-list--sidebar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    180deg,
-    rgba(15, 23, 42, 1),
-    rgba(59, 130, 246, 0.55)
-  );
+  background: linear-gradient(180deg,
+      rgba(15, 23, 42, 1),
+      rgba(59, 130, 246, 0.55));
 }
