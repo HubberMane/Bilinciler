@@ -616,10 +616,6 @@ function Topbar({ wallet, onConnectWallet, theme, onToggleTheme, onGoogleLogin, 
         <button className="btn btn-ghost theme-toggle" onClick={onToggleTheme}>
           {theme === "dark" ? "Light mode" : "Dark mode"}
         </button>
-        <div className="topbar-network">
-          <span className="network-dot" />
-          <span className="network-label">Sui Network</span>
-        </div>
         <div className="topbar-wallet">
           {enokiAddress ? (
             <div className="wallet-info" style={{ marginRight: '10px' }}>
@@ -634,8 +630,8 @@ function Topbar({ wallet, onConnectWallet, theme, onToggleTheme, onGoogleLogin, 
               className="btn btn-secondary"
               style={{
                 marginRight: '10px',
-                fontSize: '13px',
-                padding: '8px 12px',
+                fontSize: '18px',
+                padding: '14px 20px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px'
@@ -644,7 +640,7 @@ function Topbar({ wallet, onConnectWallet, theme, onToggleTheme, onGoogleLogin, 
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.8-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81z" />
               </svg>
-              Google
+              Sign in with Google
             </button>
           )}
 
@@ -880,11 +876,11 @@ function normalizeDataToPoints(data, width, height) {
 // ---- COIN LIST + MINI CHART ----
 
 function CoinMiniChart({ coin }) {
-  const [activeRange, setActiveRange] = useState("1D");
+  const [activeRange, setActiveRange] = useState("1M");
   const [chartData, setChartData] = useState(coin.sparkline || []);
 
   useEffect(() => {
-    setActiveRange("1D");
+    setActiveRange("1M");
   }, [coin.symbol]);
 
   useEffect(() => {
@@ -1002,7 +998,7 @@ function CoinList({ coins, onHover, onLeave }) {
 // ---- COIN DETAIL CHART ----
 
 function CoinDetailChart({ coin }) {
-  const [activeRange, setActiveRange] = useState("1D");
+  const [activeRange, setActiveRange] = useState("1M");
   const [chartData, setChartData] = useState(coin.sparkline || []);
 
   // Aralık değiştiğinde veya coin değiştiğinde veriyi güncelle
@@ -1116,12 +1112,18 @@ function CoinDetailChart({ coin }) {
 
 function CoinsPage({ coins }) {
   const [selectedCoin, setSelectedCoin] = useState(coins[0] || null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     if (coins.length && !selectedCoin) {
       setSelectedCoin(coins[0]);
     }
   }, [coins, selectedCoin]);
+
+  const filteredCoins = coins.filter(c =>
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="page">
@@ -1145,11 +1147,9 @@ function CoinsPage({ coins }) {
                 type="text"
                 placeholder="Search coin..."
                 className="coins-search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <select className="coins-currency">
-                <option>USD</option>
-                <option>EUR</option>
-              </select>
             </div>
           </div>
 
@@ -1166,7 +1166,7 @@ function CoinsPage({ coins }) {
                 </tr>
               </thead>
               <tbody>
-                {coins.map((coin, index) => {
+                {filteredCoins.map((coin, index) => {
                   const isActive =
                     selectedCoin && selectedCoin.symbol === coin.symbol;
 
@@ -1391,55 +1391,59 @@ function WalletPage({ wallet, coins }) {
       <div className="wallet-layout">
         <div className="page-card wallet-card">
           <h3>Address</h3>
-          {wallet.connected ? (
-            <>
-              <p className="mono wallet-address-big">{wallet.address}</p>
-              <p className="wallet-balance-big">
-                {wallet.suiBalance.toFixed(2)} SUI
+          <div className="wallet-content-scroll">
+            {wallet.connected ? (
+              <>
+                <p className="mono wallet-address-big">{wallet.address}</p>
+                <p className="wallet-balance-big">
+                  {wallet.suiBalance.toFixed(2)} SUI
+                </p>
+                <p className="helper-text">
+                  You can fetch this from Sui RPC / explorer or Slash wallet SDK.
+                </p>
+              </>
+            ) : (
+              <p className="empty-text">
+                Wallet not connected. Use the button in the top-right.
               </p>
-              <p className="helper-text">
-                You can fetch this from Sui RPC / explorer or Slash wallet SDK.
-              </p>
-            </>
-          ) : (
-            <p className="empty-text">
-              Wallet not connected. Use the button in the top-right.
-            </p>
-          )}
+            )}
+          </div>
         </div>
 
         <div className="page-card wallet-card">
           <h3>Token balances (mock)</h3>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Asset</th>
-                <th>Est. balance</th>
-                <th>Value (approx)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {coins.map((coin) => (
-                <tr key={coin.symbol}>
-                  <td>
-                    <div className="table-asset">
-                      <div className="coin-avatar small">
-                        {coin.symbol[0]}
-                      </div>
-                      <span>
-                        {coin.name} ({coin.symbol})
-                      </span>
-                    </div>
-                  </td>
-                  <td>—</td>
-                  <td>${coin.price.toLocaleString()}</td>
+          <div className="wallet-content-scroll">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Asset</th>
+                  <th>Est. balance</th>
+                  <th>Value (approx)</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="helper-text">
-            Replace this table with real balances from Slash / Sui RPC.
-          </p>
+              </thead>
+              <tbody>
+                {coins.map((coin) => (
+                  <tr key={coin.symbol}>
+                    <td>
+                      <div className="table-asset">
+                        <div className="coin-avatar small">
+                          {coin.symbol[0]}
+                        </div>
+                        <span>
+                          {coin.name} ({coin.symbol})
+                        </span>
+                      </div>
+                    </td>
+                    <td>—</td>
+                    <td>${coin.price.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="helper-text">
+              Replace this table with real balances from Slash / Sui RPC.
+            </p>
+          </div>
         </div>
       </div>
     </div>

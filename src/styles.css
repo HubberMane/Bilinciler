@@ -33,7 +33,7 @@
 
 /* Tema varyantları */
 .theme-dark {
-  --bg-main: #131321 ;
+  --bg-main: #131321;
   /* bunu sen zaten böyle yapmışsın, dokunmuyorum */
   --bg-elevated: #9896f1;
 
@@ -54,12 +54,12 @@
 
 
 .theme-light {
-  --bg-main: #bdbbd7 ;
+  --bg-main: #bdbbd7;
   --bg-elevated: #c9fdd7;
 
   /* Light tarafta yarı saydam kartlar */
   --bg-card: #bfbed4;
-  --bg-soft: #bfbed473 ;
+  --bg-soft: #bfbed473;
 
   --border-subtle: rgba(15, 23, 42, 0.08);
   --text-main: #102a43;
@@ -142,8 +142,8 @@ body {
   border-radius: var(--radius-lg);
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-card);
-
+  box-shadow: var(--shadow-card), 0 0 60px rgba(121, 209, 195, 0.05);
+  /* Ambient glow */
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -344,6 +344,7 @@ body {
   flex-direction: column;
   gap: 16px;
   /* 14 yerine 16 */
+  min-height: 0;
 }
 
 .page-header {
@@ -383,8 +384,8 @@ body {
 .btn {
   border-radius: var(--radius-pill);
   border: 0;
-  font-size: 13px;
-  padding: 8px 14px;
+  font-size: 18px;
+  padding: 14px 20px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -448,7 +449,7 @@ body {
   gap: 16px;
   align-items: stretch;
   height: 100%;
-  min-height: 420px;
+  min-height: 0;
 }
 
 .coins-table-card,
@@ -1131,7 +1132,7 @@ body {
   gap: 16px;
   /* diğer sayfalarla uyumlu boşluk */
   align-items: stretch;
-  min-height: 420px;
+  min-height: 0;
   /* coins-page ile uyum */
 }
 
@@ -1140,6 +1141,8 @@ body {
   /* grid hücresinin tamamını doldursun */
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
 }
 
 /* WALLET */
@@ -1152,7 +1155,7 @@ body {
   gap: 16px;
   align-items: stretch;
   /* kartlar dikeyde tam uzasın */
-  min-height: 420px;
+  min-height: 0;
   /* coins-page / staking ile uyumlu */
 }
 
@@ -1161,6 +1164,8 @@ body {
   /* grid hücresini tamamen doldur */
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
 }
 
 
@@ -1226,6 +1231,22 @@ body {
   .staking-layout {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  /* Responsive Buttons for Mobile */
+  .btn {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+}
+
+/* ... existing styles ... */
+
+.wallet-content-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
 }
 
 /* ========== GLOBAL COIN HOVER POPUP (SIDEBAR) ========== */
@@ -1241,7 +1262,9 @@ body {
 }
 
 .agent-chat-area,
-.coin-list--sidebar {
+.coin-list--sidebar,
+.coins-table-scroll,
+.wallet-content-scroll {
   scrollbar-width: thin;
   /* Firefox */
   scrollbar-color: rgba(15, 23, 42, 0.6) transparent;
@@ -1249,17 +1272,23 @@ body {
 
 /* WebKit (Chrome, Edge, Safari) */
 .agent-chat-area::-webkit-scrollbar,
-.coin-list--sidebar::-webkit-scrollbar {
+.coin-list--sidebar::-webkit-scrollbar,
+.coins-table-scroll::-webkit-scrollbar,
+.wallet-content-scroll::-webkit-scrollbar {
   width: 8px;
 }
 
 .agent-chat-area::-webkit-scrollbar-track,
-.coin-list--sidebar::-webkit-scrollbar-track {
+.coin-list--sidebar::-webkit-scrollbar-track,
+.coins-table-scroll::-webkit-scrollbar-track,
+.wallet-content-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
 
 .agent-chat-area::-webkit-scrollbar-thumb,
-.coin-list--sidebar::-webkit-scrollbar-thumb {
+.coin-list--sidebar::-webkit-scrollbar-thumb,
+.coins-table-scroll::-webkit-scrollbar-thumb,
+.wallet-content-scroll::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: linear-gradient(180deg,
       rgba(15, 23, 42, 0.9),
@@ -1268,7 +1297,9 @@ body {
 }
 
 .agent-chat-area::-webkit-scrollbar-thumb:hover,
-.coin-list--sidebar::-webkit-scrollbar-thumb:hover {
+.coin-list--sidebar::-webkit-scrollbar-thumb:hover,
+.coins-table-scroll::-webkit-scrollbar-thumb:hover,
+.wallet-content-scroll::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg,
       rgba(15, 23, 42, 1),
       rgba(59, 130, 246, 0.55));
