@@ -1,23 +1,74 @@
 :root {
+  /* Palette */
+  --first-color: #8ef6e4;
+  --second-color: #9896f1;
+  --third-color: #a5bdfd;
+  --fourth-color: #a5bdfd;
+
+  /* Default (dark) – tema sınıfları aşağıda override ediyor */
   --bg-main: #020617;
   --bg-elevated: #020617;
-  --bg-card: rgba(15, 23, 42, 0.95);
-  --bg-soft: rgba(15, 23, 42, 0.8);
-  --border-subtle: rgba(148, 163, 184, 0.15);
-  --accent: #22c55e;
-  --accent-soft: rgba(34, 197, 94, 0.1);
-  --accent-strong: #4ade80;
+  --bg-card: rgba(15, 23, 42, 0.97);
+  --bg-soft: rgba(15, 23, 42, 0.9);
+  --border-subtle: rgba(148, 163, 184, 0.35);
+
+  --accent: #6892d5;
+  --accent-soft: rgba(104, 146, 213, 0.25);
+  --accent-strong: #93c5fd;
+
   --danger: #ef4444;
   --warning: #eab308;
+
   --text-main: #e5e7eb;
   --text-soft: #9ca3af;
-  --radius-lg: 18px;
-  --radius-md: 12px;
+
+  --radius-lg: 20px;
+  --radius-md: 20px;
   --radius-pill: 999px;
-  --shadow-card: 0 18px 35px rgba(15, 23, 42, 0.65);
+
+  --shadow-card: 0 18px 35px rgba(15, 23, 42, 0.7);
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Segoe UI", sans-serif;
 }
+
+/* Tema varyantları */
+.theme-dark {
+  --bg-main: #a5bdfd;        /* bunu sen zaten böyle yapmışsın, dokunmuyorum */
+  --bg-elevated: #9896f1;
+
+  /* BLOKLARI ŞEFFAF YAPAN KISIM */
+  --bg-card: rgba(15, 23, 42, 0.55);  /* önce 0.97 idi */
+  --bg-soft: rgba(15, 23, 42, 0.35);  /* önce 0.9 idi */
+
+  --border-subtle: rgba(148, 163, 184, 0.35);
+  --text-main: #e5e7eb;
+  --text-soft: #9ca3af;
+
+  --accent: #6892d5;
+  --accent-soft: rgba(104, 146, 213, 0.25);
+  --accent-strong: #93c5fd;
+}
+
+
+.theme-light {
+  --bg-main: #f8fcfb;
+  --bg-elevated: #c9fdd7;
+
+  /* Light tarafta yarı saydam kartlar */
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-soft: rgba(229, 247, 243, 0.7);
+
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --text-main: #102a43;
+  --text-soft: #52606d;
+
+  --accent: #6892d5;
+  --accent-soft: rgba(104, 146, 213, 0.12);
+  --accent-strong: #335eea;
+
+  --shadow-card: 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
 
 *,
 *::before,
@@ -25,10 +76,17 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: radial-gradient(circle at top left, #0f172a 0, #020617 45%);
+  font-size: 16px;
+  background: var(--bg-main);
   color: var(--text-main);
 }
 
@@ -36,45 +94,61 @@ body {
 
 .app-root {
   display: flex;
+  height: 100vh;          /* EKRANA KİLİTLE */
   min-height: 100vh;
   color: var(--text-main);
+  padding: 18px 24px;
+  gap: 16px;
+  overflow: hidden;       /* Sayfanın kendisi scroll olmasın */
+
+
   background: radial-gradient(
       circle at 0 0,
-      rgba(59, 130, 246, 0.35),
-      transparent 45%
+      rgba(121, 209, 195, 0.25),
+      transparent 40%
     ),
     radial-gradient(
       circle at 100% 100%,
-      rgba(34, 197, 94, 0.3),
+      rgba(104, 146, 213, 0.45),
       transparent 45%
     ),
-    #020617;
+    var(--bg-main);
 }
 
 .app-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 18px 24px;
-  gap: 16px;
+  gap: 16px;    /* sadece bloklar arası mesafe */
+  padding: 0;   /* dış boşluğu artık .app-root veriyor */
+  min-height: 0;
 }
+
 
 /* SIDEBAR */
 
 .sidebar {
-  width: 230px;
-  padding: 18px 16px;
-  border-right: 1px solid var(--border-subtle);
-  backdrop-filter: blur(24px);
-  background: linear-gradient(
-    180deg,
-    rgba(15, 23, 42, 0.95),
-    rgba(15, 23, 42, 0.9)
-  );
+  /* width: 280px;  <-- BUNU SİL */
+
+  width: clamp(220px, 22vw, 300px);  /* min 220px, max 300px, ortası ekran genişliğine göre */
+  padding: 18px 24px;
+
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  flex-shrink: 0;
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  margin: 0;
 }
+
+
 
 .sidebar-logo {
   display: flex;
@@ -86,14 +160,14 @@ body {
 .sidebar-logo-mark {
   width: 34px;
   height: 34px;
-  border-radius: 12px;
-  background: radial-gradient(circle at 0 0, #4ade80, #22c55e);
+  border-radius: var(--radius-lg);
+  background: radial-gradient(circle at 0 0, var(--fourth-color), var(--third-color));
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  color: #022c22;
-  box-shadow: 0 10px 22px rgba(34, 197, 94, 0.35);
+  color: #0b1120;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.55);
 }
 
 .sidebar-logo-text span {
@@ -116,36 +190,33 @@ body {
 
 .sidebar-nav-item {
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: transparent;
   color: var(--text-soft);
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+  padding: 0 14px;
+  height: 50px;
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.08s ease;
+  font-size: 17px;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .sidebar-nav-item:hover {
-  background: rgba(15, 23, 42, 0.9);
+  background: var(--accent-soft);
   color: var(--text-main);
-  transform: translateY(-1px);
 }
 
 .sidebar-nav-item--active {
-  background: linear-gradient(
-    135deg,
-    rgba(34, 197, 94, 0.35),
-    rgba(59, 130, 246, 0.25)
-  );
-  color: #ecfdf5;
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  color: var(--text-main);
+  font-weight: 600;
 }
 
-.sidebar-nav-icon {
-  width: 22px;
-  text-align: center;
+.sidebar-nav-item--active:hover {
+  background: var(--accent-soft);
+  color: var(--text-main);
 }
 
 .sidebar-footer {
@@ -158,7 +229,7 @@ body {
   align-items: center;
   gap: 6px;
   padding: 5px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid var(--border-subtle);
   font-size: 11px;
@@ -173,11 +244,19 @@ body {
   align-items: center;
   padding: 14px 18px;
   border-radius: var(--radius-lg);
-  background: radial-gradient(circle at 0 0, rgba(34, 197, 94, 0.25), transparent 55%),
-    radial-gradient(circle at 100% 0, rgba(59, 130, 246, 0.3), transparent 50%),
-    rgba(15, 23, 42, 0.9);
+  background: radial-gradient(
+      circle at 0 0,
+      rgba(121, 209, 195, 0.2),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 100% 0,
+      rgba(104, 146, 213, 0.35),
+      transparent 50%
+    ),
+    var(--bg-card);
   box-shadow: var(--shadow-card);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  border: 1px solid var(--border-subtle);
 }
 
 .topbar-left {
@@ -199,7 +278,7 @@ body {
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
 }
 
 .topbar-network {
@@ -207,8 +286,8 @@ body {
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.9);
+  border-radius: var(--radius-pill);
+  background: var(--bg-soft);
   border: 1px solid var(--border-subtle);
   font-size: 12px;
   color: var(--text-soft);
@@ -219,7 +298,7 @@ body {
   height: 8px;
   border-radius: 999px;
   background: var(--accent);
-  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 0 6px rgba(104, 146, 213, 0.35);
 }
 
 .topbar-wallet {
@@ -245,6 +324,10 @@ body {
   color: var(--accent-strong);
 }
 
+.theme-toggle {
+  font-size: 12px;
+}
+
 /* CONTENT */
 
 .app-content {
@@ -257,18 +340,30 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;   /* 14 yerine 16 */
+}
+.page-header {
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  padding: 16px 18px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
 }
 
 .page-header h2 {
   margin: 0 0 4px;
-  font-size: 18px;
+  font-size: 22px;
 }
 
 .page-header p {
   margin: 0;
   font-size: 13px;
   color: var(--text-soft);
+}
+
+.page-title--xl {
+  font-size: 45px;
+  line-height: 1.1;
 }
 
 .page-card {
@@ -295,9 +390,9 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: #022c22;
-  box-shadow: 0 12px 22px rgba(34, 197, 94, 0.45);
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+  color: #f9fafb;
+  box-shadow: 0 12px 22px rgba(104, 146, 213, 0.45);
 }
 
 .btn-primary:hover {
@@ -305,13 +400,13 @@ body {
 }
 
 .btn-secondary {
-  background: rgba(37, 99, 235, 0.16);
-  color: #bfdbfe;
-  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: rgba(104, 146, 213, 0.16);
+  color: #e5edff;
+  border: 1px solid rgba(104, 146, 213, 0.45);
 }
 
 .btn-ghost {
-  background: rgba(15, 23, 42, 0.85);
+  background: var(--bg-soft);
   color: var(--text-soft);
   border: 1px solid var(--border-subtle);
 }
@@ -320,281 +415,124 @@ body {
   background: rgba(15, 23, 42, 1);
 }
 
-/* AGENT PAGE */
+/* ========== COINS PAGE ========== */
 
-/* STATS CARDS (üst sıra) */
-
-.stats-card {
-  border-radius: 18px;
-  padding: 10px 12px;
-  background: radial-gradient(circle at 0 0, rgba(59, 130, 246, 0.45), transparent 55%),
-    rgba(15, 23, 42, 0.96);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.8);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.coin-chart-stats {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 12px;
+  font-size: 14px;
 }
 
-.stats-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.coin-chart-stat span {
+  display: block;
+  font-size: 12px;
   color: var(--text-soft);
 }
 
-.stats-main-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-}
-
-.stats-value {
-  font-size: 18px;
+.coin-chart-stat strong {
   font-weight: 600;
 }
 
-.stats-trend {
-  font-size: 12px;
-  color: #bbf7d0;
-}
-
-.stats-sublabel {
-  font-size: 11px;
-  color: var(--text-soft);
-}
-
-
-
-.agent-page {
+.coins-page {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 2.3fr) minmax(260px, 0.9fr);
+  grid-template-columns: minmax(0, 2.1fr) minmax(260px, 1.2fr);
   gap: 16px;
+  align-items: stretch;
+  height: 100%;
+  min-height: 420px;
 }
 
-.agent-main {
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-card);
-  padding: 14px 16px 16px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 12px;
-}
-
-.agent-main--with-chart {
-  grid-template-columns: minmax(0, 1.05fr) minmax(260px, 0.9fr);
-}
-
-.agent-chat-panel {
+.coins-table-card,
+.coins-chart-card {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  overflow: hidden;
 }
 
-.agent-chat-header h2 {
-  margin: 0 0 4px;
-  font-size: 17px;
-}
+/* tablo üst header alanı */
 
-.agent-chat-header p {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-soft);
-}
-
-.agent-chat-messages {
-  flex: 1;
-  min-height: 220px;
-  max-height: 420px;
-  overflow: auto;
-  padding-right: 4px;
+.coins-table-header {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.agent-chat-input {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.agent-chat-input textarea {
-  resize: vertical;
-  min-height: 70px;
-  max-height: 140px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
-  padding: 8px 10px;
-  background: rgba(15, 23, 42, 0.9);
-  color: var(--text-main);
-  font-family: inherit;
-  font-size: 13px;
-}
-
-/* CHAT BUBBLES */
-
-.chat-bubble {
-  padding: 8px 10px;
-  border-radius: 12px;
-  max-width: 90%;
-  font-size: 13px;
-}
-
-.chat-bubble--user {
-  margin-left: auto;
-  background: rgba(37, 99, 235, 0.25);
-  border-radius: 14px 14px 2px 14px;
-}
-
-.chat-bubble--agent {
-  margin-right: auto;
-  background: rgba(15, 23, 42, 0.9);
-  border-radius: 14px 14px 14px 2px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-}
-
-.chat-bubble-meta {
-  display: flex;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 2px;
-  font-size: 11px;
-  color: var(--text-soft);
+  margin-bottom: 8px;
 }
 
-.chat-bubble-text {
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-/* AGENT CHART COLUMN */
-
-.agent-chart-column {
-  padding-left: 8px;
-}
-
-/* AGENT SIDE (COIN LIST) */
-
-.agent-side {
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-card);
-  padding: 12px 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.agent-side-header h3 {
+.coins-table-header h3 {
   margin: 0 0 2px;
-  font-size: 15px;
+  font-size: 14px;
 }
 
-.agent-side-header p {
+.coins-table-header p {
   margin: 0;
   font-size: 12px;
   color: var(--text-soft);
 }
 
-/* COIN LIST */
-
-.coin-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-.coin-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 7px 8px;
-  border-radius: var(--radius-md);
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(30, 64, 175, 0.3);
-  cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.12s ease,
-    background 0.12s ease;
-}
-
-.coin-row:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.7);
-  background: rgba(15, 23, 42, 1);
-}
-
-.coin-row-left {
+.coins-table-controls {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.coin-row-right {
-  font-size: 13px;
+.coins-search {
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-soft);
+  color: var(--text-main);
+  font-size: 14px;
+  padding: 8px 14px;
+  min-width: 240px;
 }
 
-.coin-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 0 0, #4ade80, #22c55e);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: #022c22;
+.coins-currency {
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-soft);
+  color: var(--text-main);
+  font-size: 14px;
+  padding: 8px 12px;
 }
 
-.coin-avatar.small {
-  width: 22px;
-  height: 22px;
+/* tablo satırı highlight */
+
+.coins-row {
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.coins-row:hover {
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.coins-row--active {
+  background: rgba(37, 99, 235, 0.25);
+}
+
+.coin-symbol {
   font-size: 11px;
-}
-
-.coin-name {
-  font-size: 13px;
-}
-
-.coin-price {
-  font-size: 12px;
   color: var(--text-soft);
 }
 
-.coin-change {
-  font-size: 12px;
-  padding: 3px 7px;
-  border-radius: 999px;
-}
-
-.coin-change--up {
-  background: rgba(22, 163, 74, 0.15);
-  color: #bbf7d0;
-}
-
-.coin-change--down {
-  background: rgba(239, 68, 68, 0.15);
-  color: #fecaca;
-}
-
-/* COIN CHART */
+/* Sağdaki detay grafiği */
 
 .coin-chart {
   border-radius: var(--radius-md);
   background: radial-gradient(
       circle at 0 0,
-      rgba(59, 130, 246, 0.35),
+      rgba(104, 146, 213, 0.35),
       transparent 55%
     ),
-    rgba(15, 23, 42, 0.98);
-  border: 1px solid rgba(59, 130, 246, 0.4);
+    var(--bg-card);
+  border: 1px solid rgba(104, 146, 213, 0.5);
   padding: 10px 10px 12px;
-  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -628,6 +566,7 @@ body {
   display: flex;
   align-items: flex-end;
   gap: 4px;
+  min-height: 140px;
 }
 
 .coin-chart-bar {
@@ -648,25 +587,419 @@ body {
   color: var(--text-soft);
 }
 
+/* ========== AGENT PAGE ========== */
+
+.stats-card {
+  border-radius: var(--radius-lg);
+  padding: 10px 12px;
+  background: radial-gradient(
+      circle at 0 0,
+      rgba(104, 146, 213, 0.45),
+      transparent 55%
+    ),
+    var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stats-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-soft);
+}
+
+.stats-main-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.stats-value {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.stats-trend {
+  font-size: 12px;
+  color: var(--accent-strong);
+}
+
+.stats-sublabel {
+  font-size: 11px;
+  color: var(--text-soft);
+}
+
+.agent-page {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 2.7fr) minmax(220px, 0.9fr);
+  gap: 16px;
+
+  /* EKLEDİKLERİM: */
+  height: 100%;    /* app-content yüksekliğini tamamen kullan */
+  min-height: 0;   /* içerik taşıp parent’i şişirmesin */
+}
+
+
+/* orta büyük alan (chat + uzun bar) */
+
+.agent-main-column {
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  padding: 16px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  /* EK */
+  height: 100%;
+  min-height: 0;
+}
+
+
+.agent-chat-header h2 {
+  margin: 0px 0 12;
+}
+
+.agent-chat-header p {
+  margin: 0px 0 12;
+  font-size: 13px;
+  color: var(--text-soft);
+}
+
+.agent-title {
+  /* sadece isim, ekstra bir şey gerekirse buraya */
+}
+
+.agent-chat-area {
+  flex: 1;
+  /* min-height: 260px;  <-- İstersen kaldır ya da küçült */
+  min-height: 0;          /* parent yükseklikle sınırlı kalsın */
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
+/* alttaki uzun bar */
+
+.agent-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--radius-pill);
+  padding: 6px 8px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-subtle);
+}
+
+.agent-input-bar textarea {
+  flex: 1;
+  border: none;
+  resize: none;
+  background: transparent;
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 4px 6px;
+  max-height: 80px;
+}
+
+.agent-input-bar textarea:focus {
+  outline: none;
+}
+
+/* CHAT BUBBLES */
+
+.chat-bubble {
+  padding: 20px 30px;
+  border-radius: 30px;
+  max-width: 90%;
+  font-size: 16px;
+}
+
+.chat-bubble--user {
+  margin-left: auto;
+  background: rgba(37, 99, 235, 0.25);
+  border-radius: var(--radius-md);
+}
+
+.chat-bubble--agent {
+  margin-right: auto;
+  background: var(--bg-soft);
+  border-radius: 30px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.chat-bubble-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.chat-bubble-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* sağ coin sütunu */
+
+.agent-coins-column {
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  padding: 12px 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  min-height: 0;
+
+  position: relative;   /* stacking için iyi */
+  overflow: visible;    /* popup dışarı taşabilsin */
+}
+.agent-coins-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;      /* dikey scroll burada */
+  overflow-x: visible;   /* popup sola taşabilsin */
+  padding-right: 4px;
+}
+
+/* İstersen scrollbar stilini de buraya taşıyabilirsin */
+.agent-coins-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 23, 42, 0.6) transparent;
+}
+
+
+
+.agent-coins-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+.agent-coins-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.9),
+    rgba(37, 99, 235, 0.4)
+  );
+  border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.agent-coins-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 1),
+    rgba(59, 130, 246, 0.55)
+  );
+}
+
+
+.coins-title {
+  margin: 0 0 2px;
+  font-size: 36px;
+}
+
+.coins-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+.coin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.coin-list--sidebar {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.coins-table-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.coins-table-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+
+
+.coin-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: var(--bg-soft);
+  border: 0px solid rgba(30, 64, 175, 0.4);
+  cursor: default;
+  overflow: visible;
+}
+
+.coin-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.coin-row-right {
+  font-size: 13px;
+}
+
+.coin-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 0 0, var(--fourth-color), var(--third-color));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0b1120;
+}
+
+.coin-avatar.small {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+}
+
+.coin-name {
+  font-size: 13px;
+}
+
+.coin-price {
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+/* Agent sağ sütun için 16px */
+.agent-coins-column .coin-name,
+.agent-coins-column .coin-price {
+  font-size: 16px;
+}
+
+.coin-change {
+  font-size: 12px;
+  padding: 3px 7px;
+  border-radius: var(--radius-pill);
+}
+
+.coin-change--up {
+  background: rgba(104, 146, 213, 0.18);
+  color: #dbeafe;
+}
+
+.coin-change--down {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fecaca;
+}
+
+/* HOVER POPUP CHART */
+
+.coin-popup {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%) translateX(-8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 20;
+}
+
+.coin-row:hover .coin-popup {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+  pointer-events: auto;
+}
+
+.coin-popup-inner {
+  width: 450px;
+  border-radius: var(--radius-lg);
+  padding: 14px 14px;
+  background: radial-gradient(
+      circle at 0 0,
+      rgba(104, 146, 213, 0.4),
+      transparent 60%
+    ),
+    var(--bg-card);
+  border: 1px solid rgba(104, 146, 213, 0.65);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 1);
+}
+
+.coin-popup-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: var(--text-soft);
+}
+
+.coin-popup-body {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 140px;
+}
+
+.coin-popup-bar {
+  flex: 1;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(
+    180deg,
+    rgba(129, 140, 248, 0.95),
+    rgba(30, 64, 175, 0.1)
+  );
+}
+
 /* TABLES */
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .table thead th {
   text-align: left;
-  padding: 8px 6px;
+  padding: 10px 8px;
   border-bottom: 1px solid var(--border-subtle);
   color: var(--text-soft);
   font-weight: 500;
+  font-size: 14px;
 }
 
 .table tbody td {
-  padding: 7px 6px;
+  padding: 14px 8px;
   border-bottom: 1px solid rgba(15, 23, 42, 0.9);
+  font-size: 14px;
 }
 
 .table-asset {
@@ -682,13 +1015,13 @@ body {
   align-items: center;
   justify-content: center;
   padding: 3px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 11px;
 }
 
 .badge-success {
-  background: rgba(22, 163, 74, 0.18);
-  color: #bbf7d0;
+  background: rgba(104, 146, 213, 0.2);
+  color: #dbeafe;
 }
 
 .badge-warning {
@@ -707,109 +1040,24 @@ body {
   margin-left: 6px;
 }
 
-/* NFT PAGE */
-
-.nft-creator {
-  margin-bottom: 10px;
-}
-
-.nft-prompt-input {
-  width: 100%;
-  margin-top: 8px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
-  padding: 8px 10px;
-  background: rgba(15, 23, 42, 0.95);
-  color: var(--text-main);
-  font-size: 13px;
-  resize: vertical;
-  min-height: 70px;
-}
-
-.nft-creator-actions {
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.helper-text {
-  font-size: 11px;
-  color: var(--text-soft);
-}
-
-.nft-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 12px;
-}
-
-.nft-card {
-  border-radius: var(--radius-md);
-  background: var(--bg-soft);
-  border: 1px solid var(--border-subtle);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.nft-image-wrapper img {
-  display: block;
-  width: 100%;
-  height: 170px;
-  object-fit: cover;
-}
-
-.nft-body {
-  padding: 8px 10px;
-}
-
-.nft-body h3 {
-  margin: 0 0 4px;
-  font-size: 14px;
-}
-
-.nft-desc {
-  margin: 0 0 4px;
-  font-size: 12px;
-  color: var(--text-soft);
-}
-
-.nft-prompt {
-  margin: 0;
-  font-size: 11px;
-  color: var(--text-soft);
-}
-
-.nft-prompt span {
-  color: var(--accent-strong);
-}
-
-.nft-footer {
-  padding: 7px 10px 8px;
-  border-top: 1px solid rgba(15, 23, 42, 0.9);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.nft-apy {
-  font-size: 11px;
-  color: var(--accent-strong);
-}
-
+/* STAKING */
 /* STAKING */
 
 .staking-layout {
+  flex: 1;  /* Coins'teki .coins-page gibi, kalan tüm dikeyi kapla */
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;              /* coins-page ile aynı boşluk */
+  align-items: stretch;   /* iki kart aynı yüksekliğe uzansın */
+  min-height: 420px;      /* coins-page ile aynı min-height */
 }
 
-.staking-column h3 {
-  margin: 0 0 6px;
-  font-size: 14px;
+.staking-column {
+  height: 100%;           /* grid hücresinin tamamını doldursun */
+  display: flex;
+  flex-direction: column; /* içeriği dikeyde düzgün hizala */
 }
+
 
 .staking-list {
   display: flex;
@@ -820,7 +1068,7 @@ body {
 .staking-row {
   padding: 7px 8px;
   border-radius: var(--radius-md);
-  background: rgba(15, 23, 42, 0.95);
+  background: var(--bg-soft);
   border: 1px solid rgba(30, 64, 175, 0.3);
   display: flex;
   justify-content: space-between;
@@ -839,18 +1087,42 @@ body {
 
 /* HISTORY */
 
-.history-prompt {
-  font-size: 11px;
-  color: var(--text-soft);
+/* HISTORY – coins / staking gibi tam panel */
+
+.history-layout {
+  flex: 1;                        /* page içinde kalan dikeyi kapla */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;                      /* diğer sayfalarla uyumlu boşluk */
+  align-items: stretch;
+  min-height: 420px;              /* coins-page ile uyum */
+}
+
+.history-card {
+  height: 100%;                   /* grid hücresinin tamamını doldursun */
+  display: flex;
+  flex-direction: column;
 }
 
 /* WALLET */
 
+/* WALLET */
+
 .wallet-layout {
+  flex: 1;  /* page içinde kalan dikeyi kapla */
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.6fr);
-  gap: 12px;
+  gap: 16px;
+  align-items: stretch;   /* kartlar dikeyde tam uzasın */
+  min-height: 420px;      /* coins-page / staking ile uyumlu */
 }
+
+.wallet-card {
+  height: 100%;           /* grid hücresini tamamen doldur */
+  display: flex;
+  flex-direction: column;
+}
+
 
 .wallet-address-big {
   margin: 4px 0 4px;
@@ -875,31 +1147,27 @@ body {
     "Liberation Mono", "Courier New", monospace;
 }
 
-/* MISC */
-
-.badge-success {
-  background: rgba(34, 197, 94, 0.18);
-  color: #bbf7d0;
-}
-
 /* RESPONSIVE (basic) */
 
 @media (max-width: 1024px) {
-  
-  .agent-stats-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .coins-page {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .agent-grid {
-    grid-template-columns: minmax(0, 1fr);
+  .coins-chart-card {
+    margin-top: 8px;
   }
 
   .sidebar {
     display: none;
   }
 
-  .app-main {
+  .app-root {
     padding: 12px;
+  }
+
+  .app-main {
+    padding: 0;
   }
 
   .topbar-left {
@@ -907,32 +1175,52 @@ body {
   }
 
   .agent-page {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-/* üstteki küçük kartlar */
-.agent-stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-/* alttaki büyük grid (chat + market watch) */
-.agent-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 2.3fr) minmax(260px, 0.9fr);
-  gap: 16px;
-}
-
-  .agent-main {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .agent-coins-column {
+    order: -1;
   }
 
   .wallet-layout,
   .staking-layout {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+/* ORTAK SCROLLBAR STİLİ (chat + coins sidebar) */
+.agent-chat-area,
+.coin-list--sidebar {
+  scrollbar-width: thin;                           /* Firefox */
+  scrollbar-color: rgba(15, 23, 42, 0.6) transparent;
+}
+
+/* WebKit (Chrome, Edge, Safari) */
+.agent-chat-area::-webkit-scrollbar,
+.coin-list--sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.agent-chat-area::-webkit-scrollbar-track,
+.coin-list--sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.agent-chat-area::-webkit-scrollbar-thumb,
+.coin-list--sidebar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.9),
+    rgba(37, 99, 235, 0.4)
+  );
+  border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.agent-chat-area::-webkit-scrollbar-thumb:hover,
+.coin-list--sidebar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 1),
+    rgba(59, 130, 246, 0.55)
+  );
 }
