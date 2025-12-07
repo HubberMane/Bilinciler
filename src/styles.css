@@ -1456,3 +1456,28 @@ body {
   color: var(--primary);
   font-weight: 500;
 }
+
+/* ========== SIDEBAR LOGO IMG ========== */
+.sidebar-logo-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+  transition: transform 0.3s;
+}
+
+.sidebar-logo-img:hover {
+  transform: rotate(10deg) scale(1.05);
+}
+
+/* ========== COIN LOGO ========== */
+.coin-logo-img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 12px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}

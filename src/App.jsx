@@ -34,8 +34,10 @@ async function fetchCoinsFromCMC() {
 function mapCMCToCoin(coin) {
   const quote = coin.quote?.USD || {};
   return {
+    id: coin.id,
     name: coin.name,
     symbol: coin.symbol,
+    logo: `https://s2.coinmarketcap.com/static/img/coins/64x64/${coin.id}.png`,
     price: quote.price || 0,
     change24h: quote.percent_change_24h || 0,
     change7d: quote.percent_change_7d || 0,
@@ -117,6 +119,7 @@ const FALLBACK_COINS = [
   {
     name: "Bitcoin",
     symbol: "BTC",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/1.png",
     price: 89620.6,
     change24h: -1.88,
     change7d: -1.16,
@@ -130,6 +133,7 @@ const FALLBACK_COINS = [
   {
     name: "Ethereum",
     symbol: "ETH",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png",
     price: 3037.15,
     change24h: -2.83,
     change7d: 1.33,
@@ -143,6 +147,7 @@ const FALLBACK_COINS = [
   {
     name: "Tether USDT",
     symbol: "USDT",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/825.png",
     price: 1.0,
     change24h: 0.02,
     change7d: -0.02,
@@ -156,6 +161,7 @@ const FALLBACK_COINS = [
   {
     name: "Sui",
     symbol: "SUI",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/20947.png",
     price: 1.52,
     change24h: 3.21,
     change7d: 6.8,
@@ -169,6 +175,7 @@ const FALLBACK_COINS = [
   {
     name: "Solana",
     symbol: "SOL",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png",
     price: 182.45,
     change24h: 4.12,
     change7d: 9.34,
@@ -182,6 +189,7 @@ const FALLBACK_COINS = [
   {
     name: "BNB",
     symbol: "BNB",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png",
     price: 612.31,
     change24h: -0.85,
     change7d: 2.41,
@@ -195,6 +203,7 @@ const FALLBACK_COINS = [
   {
     name: "Avalanche",
     symbol: "AVAX",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/5805.png",
     price: 42.17,
     change24h: 1.73,
     change7d: 5.66,
@@ -208,6 +217,7 @@ const FALLBACK_COINS = [
   {
     name: "XRP",
     symbol: "XRP",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png",
     price: 0.72,
     change24h: -0.94,
     change7d: 0.53,
@@ -221,6 +231,7 @@ const FALLBACK_COINS = [
   {
     name: "Dogecoin",
     symbol: "DOGE",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png",
     price: 0.18,
     change24h: 6.32,
     change7d: 11.9,
@@ -234,6 +245,7 @@ const FALLBACK_COINS = [
   {
     name: "Cardano",
     symbol: "ADA",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/2010.png",
     price: 0.62,
     change24h: -1.2,
     change7d: 3.7,
@@ -247,6 +259,7 @@ const FALLBACK_COINS = [
   {
     name: "Polkadot",
     symbol: "DOT",
+    logo: "https://s2.coinmarketcap.com/static/img/coins/64x64/6636.png",
     price: 7.84,
     change24h: 0.45,
     change7d: 2.19,
@@ -388,6 +401,14 @@ function App() {
   // Dapp Kit Hooks
   const currentAccount = useCurrentAccount();
 
+  // Fetch SUI Balance
+  const { data: balanceData } = useSuiClientQuery("getBalance", {
+    owner: currentAccount?.address,
+  }, {
+    enabled: !!currentAccount,
+    refetchInterval: 10000,
+  });
+
   // Merge Dapp Kit account with local wallet state for compatibility
   const [wallet, setWallet] = useState({
     connected: false,
@@ -397,19 +418,22 @@ function App() {
 
   useEffect(() => {
     if (currentAccount) {
+      const mist = balanceData ? Number(balanceData.totalBalance) : 0;
       setWallet(prev => ({
         ...prev,
         connected: true,
         address: currentAccount.address,
+        suiBalance: mist / 1e9,
       }));
     } else {
       setWallet(prev => ({
         ...prev,
         connected: false,
         address: "",
+        suiBalance: 0,
       }));
     }
-  }, [currentAccount]);
+  }, [currentAccount, balanceData]);
 
   const [coins, setCoins] = useState([]);
   const [coinsLoading, setCoinsLoading] = useState(false);
@@ -593,7 +617,7 @@ function Sidebar({ activePage, onChangePage }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
-        <span className="sidebar-logo-mark">S</span>
+        <img src="/logo.png" alt="Bilinciler Logo" className="sidebar-logo-img" />
         <div className="sidebar-logo-text">
           <span>Sui Agent</span>
           <small>AI Transaction Hub</small>
@@ -1003,7 +1027,24 @@ function CoinList({ coins, onHover, onLeave }) {
           onMouseLeave={onLeave}
         >
           <div className="coin-row-left">
-            <div className="coin-avatar">{coin.symbol[0]}</div>
+            {coin.logo ? (
+              <img
+                src={coin.logo}
+                alt={coin.name}
+                className="coin-logo-img"
+                style={{ width: 30, height: 30, marginRight: 12 }}
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  e.target.nextSibling.style.display = "flex";
+                }}
+              />
+            ) : null}
+            <div
+              className="coin-avatar"
+              style={{ display: coin.logo ? "none" : "flex" }}
+            >
+              {coin.symbol[0]}
+            </div>
             <div>
               <div className="coin-name">{coin.name}</div>
               <div className="coin-price">
@@ -1184,7 +1225,7 @@ function CoinsPage({ coins }) {
                   <th>Price</th>
                   <th>24h</th>
                   <th>7d</th>
-                  <th>Holdings</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -1203,7 +1244,21 @@ function CoinsPage({ coins }) {
                       <td>{index + 1}</td>
                       <td>
                         <div className="table-asset">
-                          <div className="coin-avatar small">
+                          {coin.logo ? (
+                            <img
+                              src={coin.logo}
+                              alt={coin.name}
+                              className="coin-logo-img"
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                                e.target.nextSibling.style.display = "flex";
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className="coin-avatar small"
+                            style={{ display: coin.logo ? "none" : "flex" }}
+                          >
                             {coin.symbol[0]}
                           </div>
                           <div className="coin-name">
@@ -1227,17 +1282,19 @@ function CoinsPage({ coins }) {
                         </span>
                       </td>
                       <td>
-                        <span className="badge badge-outline">soon</span>
+                        <span
+                          className={
+                            "coin-change " +
+                            (coin.change7d >= 0
+                              ? "coin-change--up"
+                              : "coin-change--down")
+                          }
+                        >
+                          {coin.change7d >= 0 ? "+" : ""}
+                          {coin.change7d.toFixed(2)}%
+                        </span>
                       </td>
-                      <td>
-                        {coin.holdings != null ? (
-                          <span className="mono">
-                            {coin.holdings} {coin.symbol}
-                          </span>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
+
                     </tr>
                   );
                 })}
@@ -1448,7 +1505,21 @@ function WalletPage({ wallet, coins }) {
                   <tr key={coin.symbol}>
                     <td>
                       <div className="table-asset">
-                        <div className="coin-avatar small">
+                        {coin.logo ? (
+                          <img
+                            src={coin.logo}
+                            alt={coin.name}
+                            className="coin-logo-img"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                              e.target.nextSibling.style.display = "flex";
+                            }}
+                          />
+                        ) : null}
+                        <div
+                          className="coin-avatar small"
+                          style={{ display: coin.logo ? "none" : "flex" }}
+                        >
                           {coin.symbol[0]}
                         </div>
                         <span>
