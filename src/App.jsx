@@ -1,7 +1,8 @@
 import "./styles.css";
 import React, { useState, useEffect, useRef } from "react";
-import { ConnectButton } from "@mysten/wallet-kit";
 import { useEnokiFlow, useZkLogin, useAuthCallback } from "@mysten/enoki/react";
+import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
+import { WalletConnectModal } from "./components/WalletConnectModal";
 
 // ---- COINMARKETCAP HELPERS ----
 
@@ -382,12 +383,33 @@ const MOCK_HISTORY = [
 function App() {
   const [activePage, setActivePage] = useState(PAGES.AGENT);
   const [theme, setTheme] = useState("dark");
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
 
+  // Dapp Kit Hooks
+  const currentAccount = useCurrentAccount();
+
+  // Merge Dapp Kit account with local wallet state for compatibility
   const [wallet, setWallet] = useState({
     connected: false,
     address: "",
     suiBalance: 0,
   });
+
+  useEffect(() => {
+    if (currentAccount) {
+      setWallet(prev => ({
+        ...prev,
+        connected: true,
+        address: currentAccount.address,
+      }));
+    } else {
+      setWallet(prev => ({
+        ...prev,
+        connected: false,
+        address: "",
+      }));
+    }
+  }, [currentAccount]);
 
   const [coins, setCoins] = useState([]);
   const [coinsLoading, setCoinsLoading] = useState(false);
@@ -407,6 +429,10 @@ function App() {
     const host = window.location.host;
     const redirectUrl = `${protocol}//${host}/`; // Redirect back to root
 
+    console.log("Initiating Google Login...");
+    console.log("Redirect URL:", redirectUrl);
+    console.log("Client ID:", import.meta.env.VITE_GOOGLE_CLIENT_ID);
+
     try {
       const url = await enokiFlow.createAuthorizationURL({
         provider: "google",
@@ -417,6 +443,7 @@ function App() {
           scope: ["openid", "email", "profile"],
         },
       });
+      console.log("Generated Auth URL:", url);
       window.location.href = url;
     } catch (error) {
       console.error("Google Login Error:", error);
@@ -468,11 +495,7 @@ function App() {
         }
 
         const json = await res.json();
-
         let data = json?.data || [];
-
-
-
         const mapped = data.map(mapCMCToCoin);
 
         if (mapped.length > 0) {
@@ -496,15 +519,7 @@ function App() {
   }, []);
 
   const handleConnectWallet = () => {
-    if (!wallet.connected) {
-      setWallet({
-        connected: true,
-        address: "0x42a1...9fD3",
-        suiBalance: 248.73,
-      });
-    } else {
-      setWallet({ connected: false, address: "", suiBalance: 0 });
-    }
+    setIsWalletModalOpen(true);
   };
 
   const handleToggleStake = (nftId) => {
@@ -555,6 +570,11 @@ function App() {
           )}
         </div>
       </div>
+
+      <WalletConnectModal
+        isOpen={isWalletModalOpen}
+        onClose={() => setIsWalletModalOpen(false)}
+      />
     </div>
   );
 }
@@ -621,7 +641,7 @@ function Topbar({ wallet, onConnectWallet, theme, onToggleTheme, onGoogleLogin, 
             <div className="wallet-info" style={{ marginRight: '10px' }}>
               <span className="wallet-balance" style={{ fontSize: '10px', color: '#999' }}>zkLogin</span>
               <span className="wallet-address" title={enokiAddress}>
-                {enokiAddress.slice(0, 6)}...{enokiAddress.slice(-4)}
+                {enokiAddress.slice(0, 4)}...{enokiAddress.slice(-4)}
               </span>
             </div>
           ) : (
@@ -647,7 +667,9 @@ function Topbar({ wallet, onConnectWallet, theme, onToggleTheme, onGoogleLogin, 
           {wallet.connected ? (
             <>
               <div className="wallet-info">
-                <span className="wallet-address">{wallet.address}</span>
+                <span className="wallet-address">
+                  {wallet.address.slice(0, 4)}...{wallet.address.slice(-4)}
+                </span>
                 <span className="wallet-balance">
                   {wallet.suiBalance.toFixed(2)} SUI
                 </span>
