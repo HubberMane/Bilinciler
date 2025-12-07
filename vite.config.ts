@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react({
@@ -11,6 +10,13 @@ export default defineConfig({
     }),
   ],
   server: {
+    host: true, // DIŞ bağlantılara izin verir
+    allowedHosts: [
+      "jacquelynn-juvenal-undisastrously.ngrok-free.dev",
+      "*.ngrok-free.dev",
+      "*.ngrok-free.app",
+      "*.ngrok.io"
+    ],
     proxy: {
       '/api': {
         target: 'https://pro-api.coinmarketcap.com',

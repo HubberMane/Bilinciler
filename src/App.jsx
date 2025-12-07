@@ -105,6 +105,7 @@ function generateFakeHistoryData(range, basePrice) {
 
 // ---- PAGES ----
 const PAGES = {
+  HOME: "home",
   AGENT: "agent",
   COINS: "coins",
   STAKING: "staking",
@@ -394,7 +395,7 @@ const MOCK_HISTORY = [
 // ---- APP ROOT ----
 
 function App() {
-  const [activePage, setActivePage] = useState(PAGES.AGENT);
+  const [activePage, setActivePage] = useState(PAGES.HOME);
   const [theme, setTheme] = useState("dark");
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
 
@@ -446,6 +447,21 @@ function App() {
   const enokiFlow = useEnokiFlow();
   const { address: enokiAddress } = useZkLogin();
   const { handled } = useAuthCallback(); // Handle Google Redirect
+
+  // User requested sidebar hidden if not connected
+  const isWalletConnected = wallet.connected || !!enokiAddress;
+
+  // Redirect to HOME when disconnecting
+  const [wasConnected, setWasConnected] = useState(false);
+
+  useEffect(() => {
+    // If we WERE connected, and now we are NOT, trigger redirect
+    if (wasConnected && !isWalletConnected) {
+      setActivePage(PAGES.HOME);
+    }
+    // Update the tracker
+    setWasConnected(isWalletConnected);
+  }, [isWalletConnected]);
 
   // Google Login Function
   const handleGoogleLogin = async () => {
@@ -560,7 +576,9 @@ function App() {
 
   return (
     <div className={`app-root theme-${theme}`}>
-      <Sidebar activePage={activePage} onChangePage={setActivePage} />
+      {isWalletConnected && (
+        <Sidebar activePage={activePage} onChangePage={setActivePage} />
+      )}
 
       <div className="app-main">
         <Topbar
@@ -570,6 +588,7 @@ function App() {
           onToggleTheme={handleToggleTheme}
           onGoogleLogin={handleGoogleLogin}
           enokiAddress={enokiAddress}
+          showLogo={!isWalletConnected}
         />
 
         {coinsError && (
@@ -583,6 +602,7 @@ function App() {
         )}
 
         <div className="app-content">
+          {activePage === PAGES.HOME && <HomePage onChangePage={setActivePage} />}
           {activePage === PAGES.AGENT && <AgentPage coins={coins} />}
           {activePage === PAGES.COINS && <CoinsPage coins={coins} />}
           {activePage === PAGES.STAKING && (
@@ -616,11 +636,15 @@ function Sidebar({ activePage, onChangePage }) {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">
+      <div
+        className="sidebar-logo"
+        onClick={() => onChangePage(PAGES.HOME)}
+        style={{ cursor: "pointer" }}
+      >
         <img src="/logo.png" alt="Bilinciler Logo" className="sidebar-logo-img" />
         <div className="sidebar-logo-text">
-          <span>Sui Agent</span>
-          <small>AI Transaction Hub</small>
+          <span>Jellyfish
+          </span>
         </div>
       </div>
 
@@ -646,29 +670,51 @@ function Sidebar({ activePage, onChangePage }) {
   );
 }
 
-function Topbar({ wallet, onConnectWallet, theme, onToggleTheme, onGoogleLogin, enokiAddress }) {
+function Topbar({ wallet, onConnectWallet, theme, onToggleTheme, onGoogleLogin, enokiAddress, showLogo }) {
   return (
-    <header className="topbar">
-      <div className="topbar-left">
-        <h1 className="topbar-title">AI-Powered Sui Console</h1>
-        <p className="topbar-subtitle">
-          Give natural language commands. Let your agent handle the on-chain
-          work.
-        </p>
+    <header className={`topbar ${showLogo ? "topbar--centered" : ""}`}>
+      <div className="topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {showLogo && (
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="topbar-logo-img"
+          />
+        )}
+        <div>
+          <h1 className="topbar-title">Jellyfish</h1>
+          <p className="topbar-subtitle">
+
+          </p>
+        </div>
       </div>
       <div className="topbar-right">
+        {/* If connected (Sui or Enoki), show address FIRST */}
+        {wallet.connected && (
+          <div className="wallet-info" style={{ marginRight: '16px' }}>
+            <span className="wallet-address">
+              {wallet.address.slice(0, 4)}...{wallet.address.slice(-4)}
+            </span>
+            <span className="wallet-balance">
+              {wallet.suiBalance.toFixed(2)} SUI
+            </span>
+          </div>
+        )}
+        {enokiAddress && !wallet.connected && (
+          <div className="wallet-info" style={{ marginRight: '16px' }}>
+            <span className="wallet-balance" style={{ fontSize: '10px', color: '#999' }}>zkLogin</span>
+            <span className="wallet-address" title={enokiAddress}>
+              {enokiAddress.slice(0, 4)}...{enokiAddress.slice(-4)}
+            </span>
+          </div>
+        )}
+
         <button className="btn btn-ghost theme-toggle" onClick={onToggleTheme}>
           {theme === "dark" ? "Light mode" : "Dark mode"}
         </button>
+
         <div className="topbar-wallet">
-          {enokiAddress ? (
-            <div className="wallet-info" style={{ marginRight: '10px' }}>
-              <span className="wallet-balance" style={{ fontSize: '10px', color: '#999' }}>zkLogin</span>
-              <span className="wallet-address" title={enokiAddress}>
-                {enokiAddress.slice(0, 4)}...{enokiAddress.slice(-4)}
-              </span>
-            </div>
-          ) : (
+          {!enokiAddress && !wallet.connected && (
             <button
               onClick={onGoogleLogin}
               className="btn btn-secondary"
@@ -689,27 +735,58 @@ function Topbar({ wallet, onConnectWallet, theme, onToggleTheme, onGoogleLogin, 
           )}
 
           {wallet.connected ? (
-            <>
-              <div className="wallet-info">
-                <span className="wallet-address">
-                  {wallet.address.slice(0, 4)}...{wallet.address.slice(-4)}
-                </span>
-                <span className="wallet-balance">
-                  {wallet.suiBalance.toFixed(2)} SUI
-                </span>
-              </div>
-              <button className="btn btn-ghost" onClick={onConnectWallet}>
-                Disconnect
-              </button>
-            </>
-          ) : (
-            <button className="btn btn-primary" onClick={onConnectWallet}>
-              Connect Wallet
+            <button className="btn btn-ghost" onClick={onConnectWallet}>
+              Disconnect
             </button>
+          ) : (
+            <>
+              {/* Connect button only if not logged in via Enoki either? Or allow both? Assuming allow both for now */}
+              {!enokiAddress && (
+                <button className="btn btn-primary" onClick={onConnectWallet}>
+                  Connect Wallet
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
     </header>
+  );
+}
+
+// ---- PAGE: HOME (LANDING) ----
+function HomePage({ onChangePage }) {
+  return (
+    <div className="page home-page">
+      <div className="home-hero">
+        <div className="home-hero-text">
+          <h1 className="home-title">
+            Stake your SUI,<br />
+            earn rewards, &<br />
+            secure the Network
+          </h1>
+          <p className="home-subtitle">
+            Bilinciler is the leading AI-powered liquid staking and transaction
+            protocol for the Sui ecosystem.
+          </p>
+          <div className="home-cta-group">
+            <button
+              className="btn btn-primary btn-lg"
+              onClick={() => onChangePage(PAGES.COINS)}
+            >
+              Liquid Staking
+            </button>
+            <button
+              className="btn btn-secondary btn-lg"
+              onClick={() => onChangePage(PAGES.AGENT)}
+            >
+              Talk to Agent
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
   );
 }
 
@@ -1458,14 +1535,31 @@ function HistoryPage({ history }) {
 // ---- PAGE: WALLET ----
 
 function WalletPage({ wallet, coins }) {
+  const [copied, setCopied] = useState(false);
+
+  const copyAddress = () => {
+    if (wallet.address) {
+      navigator.clipboard.writeText(wallet.address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <div className="page">
-      <div className="page-header">
-        <h2>Wallet overview</h2>
-        <p>
-          Data here will come from Slash wallet / Sui wallet adapter. This is a
-          read-only overview for your agent.
-        </p>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2>Wallet overview</h2>
+          <p>
+            Data here will come from Slash wallet / Sui wallet adapter. This is a
+            read-only overview for your agent.
+          </p>
+        </div>
+        {wallet.connected && (
+          <div className="wallet-balance-header" style={{ marginRight: '15px' }}>
+            {wallet.suiBalance.toFixed(2)} SUI
+          </div>
+        )}
       </div>
       <div className="wallet-layout">
         <div className="page-card wallet-card">
@@ -1473,11 +1567,13 @@ function WalletPage({ wallet, coins }) {
           <div className="wallet-content-scroll">
             {wallet.connected ? (
               <>
-                <p className="mono wallet-address-big">{wallet.address}</p>
-                <p className="wallet-balance-big">
-                  {wallet.suiBalance.toFixed(2)} SUI
-                </p>
-                <p className="helper-text">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <p className="mono wallet-address-big" style={{ margin: 0, fontSize: '18px' }}>{wallet.address}</p>
+                  <button className="btn btn-ghost" onClick={copyAddress} style={{ padding: '8px 16px', fontSize: '14px' }}>
+                    {copied ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <p className="helper-text" style={{ marginTop: '12px' }}>
                   You can fetch this from Sui RPC / explorer or Slash wallet SDK.
                 </p>
               </>

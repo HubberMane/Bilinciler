@@ -178,8 +178,14 @@ body {
 
 .sidebar-logo-text span {
   display: block;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fff 30%, #a5f3fc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .sidebar-logo-text small {
@@ -204,7 +210,7 @@ body {
   padding: 0 14px;
   height: 50px;
   cursor: pointer;
-  font-size: 17px;
+  font-size: 20px;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
@@ -249,6 +255,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 14px 18px;
+
   border-radius: var(--radius-lg);
   background: radial-gradient(circle at 0 0,
       rgba(121, 209, 195, 0.2),
@@ -261,14 +268,24 @@ body {
   border: 1px solid var(--border-subtle);
 }
 
+.topbar--centered {
+  margin: 0 215px;
+}
+
 .topbar-left {
   max-width: 60%;
 }
 
 .topbar-title {
   margin: 0 0 4px;
-  font-size: 20px;
-  letter-spacing: 0.01em;
+  font-family: 'Outfit', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fff 30%, #a5f3fc 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .topbar-subtitle {
@@ -768,6 +785,7 @@ body {
   gap: 8px;
   height: 100%;
   min-height: 0;
+  flex: 1;
 
   position: relative;
   overflow: visible;
@@ -859,6 +877,8 @@ body {
   flex-direction: column;
   gap: 6px;
   margin-top: 4px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .coin-list--sidebar {
@@ -879,20 +899,6 @@ body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-}
-
-
-
-.coin-row {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 8px 10px;
-  border-radius: var(--radius-md);
-  background: var(--bg-soft);
-  border: 0px solid rgba(30, 64, 175, 0.4);
-  cursor: default;
-  overflow: visible;
 }
 
 .coin-row-left {
@@ -917,6 +923,33 @@ body {
   font-weight: 600;
   color: #0b1120;
 }
+
+.coin-avatar.small {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+}
+
+.coin-name {
+  font-size: 13px;
+}
+
+.coin-price {
+  font-size: 12px;
+  color: var(--text-soft);
+}
+
+
+
+
+
+
+
+.coin-row-right {
+  font-size: 13px;
+}
+
+
 
 .coin-avatar.small {
   width: 22px;
@@ -1004,9 +1037,6 @@ body {
 .coin-popup-bar {
   flex: 1;
   border-radius: 6px 6px 0 0;
-  background: linear-gradient(180deg,
-      rgba(129, 140, 248, 0.95),
-      rgba(30, 64, 175, 0.1));
 }
 
 /* TABLES */
@@ -1072,7 +1102,14 @@ body {
 
 /* STAKING */
 
-.staking-layout {}
+.staking-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  min-height: 0;
+}
 
 
 .staking-list {
@@ -1457,6 +1494,12 @@ body {
   font-weight: 500;
 }
 
+.wallet-balance-header {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
 /* ========== SIDEBAR LOGO IMG ========== */
 .sidebar-logo-img {
   width: 60px;
@@ -1472,6 +1515,21 @@ body {
   transform: rotate(10deg) scale(1.05);
 }
 
+/* Same style for topbar logo (disconnected state) */
+.topbar-logo-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+  transition: transform 0.3s;
+}
+
+.topbar-logo-img:hover {
+  transform: rotate(10deg) scale(1.05);
+}
+
 /* ========== COIN LOGO ========== */
 .coin-logo-img {
   width: 30px;
@@ -1480,4 +1538,141 @@ body {
   object-fit: cover;
   margin-right: 12px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* ========== HOME PAGE ========== */
+.home-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 120px);
+  padding: 40px;
+  overflow: hidden;
+}
+
+.home-hero {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.home-hero-text {
+  flex: 1;
+  max-width: 600px;
+  position: relative;
+  z-index: 2;
+}
+
+.home-title {
+  font-size: 4rem;
+  line-height: 1.1;
+  font-weight: 800;
+  margin-bottom: 24px;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.home-subtitle {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.home-cta-group {
+  display: flex;
+  gap: 16px;
+}
+
+.home-hero-image {
+  position: absolute;
+  /* More left to overlap text */
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 800px;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.jellyfish-container {
+  width: 100%;
+  height: auto;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.jellyfish-animated {
+  width: 100%;
+  max-width: 800px;
+  /* Screen mode hides the black background */
+  mix-blend-mode: screen;
+  opacity: 1;
+  /* No clip-path needed as there is no ring */
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(2deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@media (max-width: 900px) {
+  .home-hero {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .home-hero-image {
+    position: relative;
+    right: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    margin-top: -50px;
+    margin-bottom: 20px;
+    opacity: 0.6;
+    order: -1;
+  }
+
+  .jellyfish-animated {
+    max-width: 300px;
+  }
+
+  .home-hero-text {
+    z-index: 2;
+  }
+
+  .home-subtitle {
+    margin: 0 auto 30px;
+  }
+
+  .home-cta-group {
+    justify-content: center;
+  }
+
+  .home-title {
+    font-size: 2.5rem;
+  }
 }
